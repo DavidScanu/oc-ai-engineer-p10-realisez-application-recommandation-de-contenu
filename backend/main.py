@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 # Création de l'application FastAPI
 app = FastAPI(
-    title="My Content Recommender API",
+    title="API de recommandation My Content",
     description="API de recommandation d'articles pour My Content",
     version="1.0.0"
 )
