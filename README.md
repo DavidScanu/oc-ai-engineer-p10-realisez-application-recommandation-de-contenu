@@ -20,11 +20,11 @@ Le dataset est composé de trois éléments principaux :
 - **Métadonnées des articles** : Informations sur 364K+ articles (`articles_metadata.csv`)
 - **Embeddings des articles** : Représentations vectorielles de 250 dimensions (`articles_embeddings.pickle`)
 
-### Analyse des interactions utilisateurs
+### Analyse des interactions utilisateurs et des métadonnées des articles
 
 ```bash
-# Compter les utilisateurs et analyser les interactions
-python3 backend/scripts/count_users.py
+# Comander pour exécuter l'analyse
+python3 backend/data-analysis/analyze_data.py
 ```
 
 **Résultats clés :**
@@ -34,13 +34,6 @@ python3 backend/scripts/count_users.py
 - 📊 **9.3 clics/utilisateur** en moyenne
 - 📊 **64.9 clics/article** en moyenne
 - 📁 **385 fichiers horaires** de données
-
-### Analyse des métadonnées des articles
-
-```bash
-# Analyser les caractéristiques des articles
-python3 backend/scripts/analyze_articles_metadata.py
-```
 
 #### Informations générales
 - 📄 **364,047 articles** au total
