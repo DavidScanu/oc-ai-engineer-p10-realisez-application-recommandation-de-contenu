@@ -9,7 +9,6 @@ class Settings(BaseSettings):
     DATA_PATH: Path = Path("data")  # Relatif à backend/
     
     # Paramètres temporels (auto-adaptés aux données)
-    POPULARITY_WINDOW_DAYS: int = 90  # 90 jours pour la popularité
     MAX_ARTICLE_AGE_DAYS: int = 730   # 2 ans pour les articles recommandables
     MIN_WORDS_COUNT: int = 50         # Filtrage articles courts
     

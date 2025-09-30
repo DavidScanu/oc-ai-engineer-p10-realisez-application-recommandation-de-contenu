@@ -104,25 +104,7 @@ Ces insights guideront la conception des algorithmes de recommandation, notammen
 #### ⚠️ **Points d'attention pour nos recommandeurs**
 - **Un seul éditeur** : Pas de diversification par source
 - **Concentration temporelle** : 2017-2018 = 55% des articles
-- **Articles très courts** : 3,729 articles < 50 mots (à filtrer ?)
-
-### 🎯 **Adaptations pour nos recommandeurs**
-
-#### **1. Popularité récente**
-- ✅ Fenêtre de 3 jours sera parfaite
-- ✅ Focus sur 2017-2018 (données les plus denses)
-
-#### **2. Content-based**  
-- ✅ 461 catégories = excellent pour la diversification
-- ✅ Embeddings sur 364K articles = très riche
-- ⚠️ Filtrer les articles < 50 mots
-
-#### **3. Clustering utilisateurs**
-- ✅ 461 catégories = bonnes features pour segmenter
-- ✅ 5 clusters seront suffisants avec cette distribution
-
-#### **4. Hybride**
-- ✅ Équilibrage 40/30/20/10 adapté à cette diversité
+- **Articles très courts** : 3,729 articles < 50 mots (à filtrer)
 
 ---
 
@@ -134,17 +116,60 @@ Ces insights guideront la conception des algorithmes de recommandation, notammen
 
 L'application implémente **4 méthodes de recommandation** complémentaires :
 
-- **🔥 Popularité récente** : Recommande les articles les plus consultés dans les 90 derniers jours
+- **🔥 Popularité normalisée par âge** : Recommande les articles avec le meilleur ratio clics/mois d'existence (favorise les tendances récentes)
 - **📖 Similarité de contenu** : Utilise les embeddings pour recommander des articles similaires à ceux déjà lus
-- **👥 Clustering d'utilisateurs** : Segmente les utilisateurs en 5 groupes et recommande les articles populaires dans chaque segment  
+- **👥 Clustering d'utilisateurs** : Segmente les utilisateurs en 5 groupes et recommande les articles populaires dans chaque segment
 - **🎭 Hybride** : Combine intelligemment les 3 approches précédentes avec pondération (40% clustering, 30% contenu, 20% popularité, 10% diversité)
+
+
+
+#### Calcul de popularité normalisée
+
+Le système utilise une approche innovante pour calculer la popularité en **normalisant par l'âge de l'article** :
+
+**Formule** :
+```
+popularity_score = (0.7 × unique_users + 0.3 × total_clicks) / article_age_months
+```
+
+**Avantages** :
+- ✅ **Équité temporelle** : Les nouveaux articles ne sont pas désavantagés par rapport aux anciens
+- ✅ **Détection de tendances** : Un article récent avec peu de clics peut surpasser un ancien avec beaucoup de clics s'il a un meilleur ratio
+- ✅ **Pas de fenêtre arbitraire** : Plus besoin de définir une fenêtre fixe (ex: 90 jours)
+
+**Exemple** :
+```
+Article A (8 mois) : 800 clics → score = 800/8 = 100 clics/mois
+Article B (1 mois)  : 150 clics → score = 150/1 = 150 clics/mois
+→ Article B est considéré comme plus "populaire" car plus tendance
+```
+
+**Protection** : Un âge minimum de 0.5 mois est appliqué pour éviter des scores artificiellement élevés sur des articles publiés il y a quelques jours.
 
 ### Gestion adaptative des données
 
-- **Détection automatique** de la date de référence (mars 2018 pour ce dataset)
+- **Détection automatique** de la date de référence (dernier clic enregistré: 2017-11-13 pour ce dataset)
 - **Filtrage qualité** : Exclusion des articles < 50 mots et > 2 ans
 - **Optimisation temporelle** : Simulation de recommandations en temps réel basée sur les données historiques
 - **Cache intelligent** : Mise en cache des calculs coûteux (clusters, popularité)
+
+### Dates de référence et cohérence temporelle
+
+Le système utilise deux dates de référence distinctes provenant de sources différentes :
+
+- **`reference_date`** : **2017-11-13** (dernier clic enregistré)
+  - Source : `interactions['click_timestamp'].max()`
+  - Représente la dernière interaction utilisateur dans les données de clics
+  - Utilisée comme point de référence temporel pour tous les calculs (fenêtres de popularité, filtrage d'articles, etc.)
+
+- **`max_article_date`** : **2018-03-13** (dernier article publié)
+  - Source : `articles_metadata['created_at_ts'].max()`
+  - Représente l'article le plus récent dans le catalogue
+  - Écart de ~4 mois avec `reference_date`
+
+**Explication de l'écart** : Les datasets d'interactions (`clicks/`) et de métadonnées (`articles_metadata.csv`) ont été extraits à des moments différents, ou les articles publiés entre novembre 2017 et mars 2018 n'ont simplement pas reçu de clics dans les données collectées.
+
+**Impact positif** : Le système utilise correctement `reference_date` (dernière interaction) comme point de référence temporel, ce qui garantit que les recommandations sont cohérentes et n'utilisent pas d'articles "du futur" qui n'avaient pas encore de clics au moment de la dernière interaction enregistrée.
 
 ### API REST complète
 
@@ -153,7 +178,6 @@ L'application implémente **4 méthodes de recommandation** complémentaires :
 - **Validation automatique** des paramètres avec Pydantic
 - **Support CORS** pour l'intégration frontend
 - **Endpoints de debug** pour le monitoring et les tests
-
 
 ## Lancement du backend de l'application
 
@@ -413,7 +437,6 @@ backend/
 ### Paramètres principaux (config.py)
 
 ```python
-POPULARITY_WINDOW_DAYS = 90      # Fenêtre de popularité (jours)
 MAX_ARTICLE_AGE_DAYS = 730       # Âge maximum des articles (jours)
 MIN_WORDS_COUNT = 50             # Nombre minimum de mots par article
 N_USER_CLUSTERS = 5              # Nombre de segments utilisateurs
@@ -423,7 +446,7 @@ MIN_USER_INTERACTIONS = 3         # Seuil pour "nouveaux utilisateurs"
 HYBRID_WEIGHTS = {
     "clustering": 0.4,           # Filtrage collaboratif
     "content": 0.3,              # Similarité de contenu
-    "popularity": 0.2,           # Popularité récente
+    "popularity": 0.2,           # Popularité normalisée par âge
     "diversity": 0.1             # Bonus diversité
 }
 ```
@@ -434,7 +457,8 @@ Créez un fichier `.env` dans le dossier `backend/` pour personnaliser :
 
 ```env
 DATA_PATH=data
-POPULARITY_WINDOW_DAYS=90
+MAX_ARTICLE_AGE_DAYS=730
+MIN_WORDS_COUNT=50
 N_RECOMMENDATIONS=5
 N_USER_CLUSTERS=5
 ```

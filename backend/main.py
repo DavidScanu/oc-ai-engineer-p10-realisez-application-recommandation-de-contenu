@@ -385,7 +385,6 @@ async def get_config():
     """Configuration actuelle (debug)"""
     return {
         "DATA_PATH": str(settings.DATA_PATH),
-        "POPULARITY_WINDOW_DAYS": settings.POPULARITY_WINDOW_DAYS,
         "MAX_ARTICLE_AGE_DAYS": settings.MAX_ARTICLE_AGE_DAYS,
         "MIN_WORDS_COUNT": settings.MIN_WORDS_COUNT,
         "N_RECOMMENDATIONS": settings.N_RECOMMENDATIONS,

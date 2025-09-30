@@ -136,41 +136,50 @@ class DataLoader:
         return user_data
     
     def get_recent_popular_articles(self, days: int = None) -> pd.DataFrame:
-        """Récupère les articles populaires dans la fenêtre temporelle"""
-        if days is None:
-            days = settings.POPULARITY_WINDOW_DAYS
-            
+        """Récupère les articles populaires avec normalisation par âge de l'article"""
         interactions = self.load_user_interactions()
+        metadata = self.load_articles_metadata()
         reference_date = self._get_reference_date()
-        cutoff_date = reference_date - timedelta(days=days)
-        cutoff_timestamp = int(cutoff_date.timestamp() * 1000)
-        
-        recent_interactions = interactions[
-            interactions['click_timestamp'] >= cutoff_timestamp
-        ]
-        
-        if len(recent_interactions) == 0:
-            logger.warning(f"⚠️ Aucune interaction dans les {days} derniers jours avant {reference_date.strftime('%Y-%m-%d')}")
-            # Fallback: prendre les interactions les plus récentes
-            recent_interactions = interactions.nlargest(min(10000, len(interactions)), 'click_timestamp')
-            logger.info(f"🔄 Fallback: utilisation des {len(recent_interactions):,} interactions les plus récentes")
-        
-        popularity = recent_interactions.groupby('click_article_id').agg({
+
+        if len(interactions) == 0:
+            logger.warning("⚠️ Aucune interaction disponible")
+            return pd.DataFrame()
+
+        # Agréger tous les clics par article
+        popularity = interactions.groupby('click_article_id').agg({
             'user_id': 'nunique',
             'click_timestamp': 'count'
         }).rename(columns={
             'user_id': 'unique_users',
             'click_timestamp': 'total_clicks'
         })
-        
-        # Score de popularité combinant utilisateurs uniques et clics totaux
-        popularity['popularity_score'] = (
+
+        # Joindre avec les métadonnées pour obtenir la date de création
+        popularity = popularity.merge(
+            metadata[['article_id', 'created_date']],
+            left_index=True,
+            right_on='article_id',
+            how='left'
+        )
+
+        # Calculer l'âge de l'article en mois
+        popularity['article_age_days'] = (reference_date - popularity['created_date']).dt.days
+        popularity['article_age_months'] = popularity['article_age_days'] / 30.0
+
+        # Normaliser par l'âge (minimum 0.5 mois pour éviter division par zéro sur articles très récents)
+        popularity['article_age_months'] = popularity['article_age_months'].clip(lower=0.5)
+
+        # Score brut combinant utilisateurs uniques et clics totaux
+        popularity['raw_score'] = (
             0.7 * popularity['unique_users'] + 0.3 * popularity['total_clicks']
         )
-        
+
+        # Score normalisé par l'âge de l'article (clics par mois d'existence)
+        popularity['popularity_score'] = popularity['raw_score'] / popularity['article_age_months']
+
         result = popularity.sort_values('popularity_score', ascending=False)
-        logger.info(f"📈 Articles populaires calculés: {len(result):,} articles")
-        
+        logger.info(f"📈 Articles populaires calculés: {len(result):,} articles (normalisés par âge)")
+
         return result
     
     def get_all_users(self) -> List[int]:
