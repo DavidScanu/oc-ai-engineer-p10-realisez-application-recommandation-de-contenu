@@ -36,3 +36,6 @@
 - Ajouter un paramètre de nouveauté
 - ✅ **Nouvel utilisateur** : Quand on entre un ID utilisateur qui n’existe pas, quelle méthode de recommandation ? Popularité.
 - ✅ Explication de ce qu'il se passe en cas de nouvel utilisateur (cold start) et de nouvel article dans la documentation.
+- Novelty score pour le cold start des articles 
+- Ajouter un paramètre de diversité
+

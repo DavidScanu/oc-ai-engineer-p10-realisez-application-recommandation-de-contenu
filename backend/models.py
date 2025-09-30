@@ -30,6 +30,8 @@ class RecommendationRequest(BaseModel):
 class RecommendationResponse(BaseModel):
     user_id: int
     method: str
+    actual_method: str
+    fallback_applied: bool
     recommendations: List[Dict[str, Any]]
     metadata: Dict[str, Any]
     generated_at: datetime

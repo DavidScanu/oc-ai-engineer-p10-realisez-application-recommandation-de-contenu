@@ -139,15 +139,18 @@ async def recommend_for_user(
         # Détecter si un fallback a été appliqué
         fallback_applied = False
         actual_method = method
+        fallback_reason = None
+
         if recommendations and isinstance(recommendations, list) and len(recommendations) > 0:
             if 'fallback_from' in recommendations[0]:
                 fallback_applied = True
                 actual_method = 'popularity'
+                fallback_reason = f"Cold start: utilisateur sans historique, fallback de '{method}' vers 'popularity'"
 
         # Métadonnées sur la recommandation
         user_stats = data_loader.get_user_stats(user_id)
         metadata = {
-            "method": method,
+            "requested_method": method,
             "actual_method": actual_method,
             "fallback_applied": fallback_applied,
             "parameters": {
@@ -158,12 +161,14 @@ async def recommend_for_user(
             "results_count": len(recommendations)
         }
 
-        if fallback_applied:
-            metadata["fallback_reason"] = f"Cold start: utilisateur sans historique, fallback de '{method}' vers 'popularity'"
+        if fallback_reason:
+            metadata["fallback_reason"] = fallback_reason
 
         return RecommendationResponse(
             user_id=user_id,
             method=method,
+            actual_method=actual_method,
+            fallback_applied=fallback_applied,
             recommendations=recommendations,
             metadata=metadata,
             generated_at=datetime.now()

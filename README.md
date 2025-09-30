@@ -174,7 +174,7 @@ Le système gère automatiquement le problème du **cold start** pour les utilis
 | **Popularité** | ✅ Fonctionne directement (ne dépend pas de l'utilisateur) |
 | **Similarité de contenu** | ✅ Fallback automatique sur Popularité |
 | **Clustering** | ✅ Fallback automatique sur Popularité |
-| **Hybride** | ✅ Utilise Popularité via les fallbacks des autres méthodes |
+| **Hybride** | ✅ Fallback automatique sur Popularité |
 
 **Avantages** :
 - ✅ **Aucune erreur** pour un utilisateur inexistant
@@ -186,15 +186,25 @@ Le système gère automatiquement le problème du **cold start** pour les utilis
 
 #### Transparence du fallback dans les réponses API
 
-Lorsqu'un fallback est appliqué, l'API indique clairement cette information dans les métadonnées de la réponse :
+Lorsqu'un fallback est appliqué, l'API indique clairement cette information **à la fois au niveau racine ET dans les métadonnées** de la réponse :
 
 ```json
 {
   "user_id": 999999,
   "method": "content",
-  "recommendations": [...],
+  "actual_method": "popularity",
+  "fallback_applied": true,
+  "recommendations": [
+    {
+      "article_id": 160974,
+      "score": 25046.71428571429,
+      "reason": "Article populaire (#1) - 34145 utilisateurs, 37213 clics",
+      "metadata": {...},
+      "fallback_from": "content"
+    }
+  ],
   "metadata": {
-    "method": "content",
+    "requested_method": "content",
     "actual_method": "popularity",
     "fallback_applied": true,
     "fallback_reason": "Cold start: utilisateur sans historique, fallback de 'content' vers 'popularity'",
@@ -209,19 +219,66 @@ Lorsqu'un fallback est appliqué, l'API indique clairement cette information dan
       "top_categories": [],
       "is_new_user": true
     }
+  },
+  "generated_at": "2025-09-30T09:49:40.605752"
+}
+```
+
+**Champs ajoutés au niveau racine (accès rapide)** :
+- `actual_method` : La méthode réellement utilisée après fallback
+- `fallback_applied` : Boolean indiquant si un fallback a été effectué
+
+**Champs ajoutés dans les métadonnées (détails)** :
+- `requested_method` : La méthode initialement demandée par l'utilisateur
+- `actual_method` : La méthode réellement utilisée (identique si pas de fallback)
+- `fallback_applied` : Boolean indiquant si un fallback a été effectué
+- `fallback_reason` : Explication détaillée du pourquoi du fallback (uniquement si fallback appliqué)
+
+**Champs ajoutés dans chaque recommandation** :
+- `fallback_from` : Indique la méthode d'origine qui a déclenché le fallback (uniquement si fallback appliqué)
+
+**Exemple sans fallback (utilisateur existant)** :
+```json
+{
+  "user_id": 5890,
+  "method": "content",
+  "actual_method": "content",
+  "fallback_applied": false,
+  "recommendations": [
+    {
+      "article_id": 208436,
+      "score": 0.8247120976448059,
+      "reason": "Similaire à vos lectures (score: 0.825)",
+      "metadata": {...}
+    }
+  ],
+  "metadata": {
+    "requested_method": "content",
+    "actual_method": "content",
+    "fallback_applied": false,
+    "user_stats": {...}
   }
 }
 ```
 
-**Champs ajoutés dans les métadonnées** :
-- `actual_method` : La méthode réellement utilisée après fallback
-- `fallback_applied` : Boolean indiquant si un fallback a été effectué
-- `fallback_reason` : Explication détaillée du pourquoi du fallback
+**Avantages de cette structure** :
+- ✅ **Accès facile** : `fallback_applied` et `actual_method` directement au niveau racine
+- ✅ **Détection automatique** : Les applications clientes peuvent vérifier le fallback sans parser les métadonnées
+- ✅ **Transparence complète** : Toutes les informations nécessaires sont disponibles
+- ✅ **Compatibilité** : Les métadonnées conservent aussi ces informations pour les usages avancés
+- ✅ **Logging/Analytics** : Facilite le suivi des taux de fallback et la compréhension du comportement utilisateur
 
-Cela permet aux applications clientes de :
-- ✅ Détecter automatiquement les cas de cold start
-- ✅ Afficher un message adapté à l'utilisateur (ex: "Nouveaux utilisateurs : voici les articles tendances")
-- ✅ Logger et monitorer les taux de fallback pour améliorer le système
+**Utilisation côté client** :
+```javascript
+// Vérification simple
+if (response.fallback_applied) {
+  console.log(`Fallback détecté: ${response.method} → ${response.actual_method}`);
+  showMessage("Recommandations basées sur les tendances actuelles");
+}
+
+// Accès direct à la méthode réelle
+const effectiveMethod = response.actual_method;
+```
 
 ### Gestion adaptative des données
 

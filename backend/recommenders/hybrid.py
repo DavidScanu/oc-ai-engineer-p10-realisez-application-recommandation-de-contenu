@@ -22,13 +22,25 @@ class HybridRecommender(BaseRecommender):
     def recommend(self, user_id: int, n_recommendations: int = 5, **kwargs) -> List[Dict[str, Any]]:
         """Combine les recommandations de plusieurs approches"""
         from config import settings
-        
+
         logger.info(f"🎭 Recommandation hybride pour user {user_id}")
-        
+
         # Paramètres
         weights = settings.HYBRID_WEIGHTS
         exclude_seen = kwargs.get('exclude_seen', True)
-        
+
+        # Vérifier si l'utilisateur a un historique (cold start detection)
+        user_history = self.data_loader.get_user_history(user_id)
+        if len(user_history) == 0:
+            logger.warning(f"⚠️ User {user_id} sans historique, fallback hybride vers popularité (cold start)")
+            # Fallback direct vers popularité
+            recommendations = self.popularity_rec.recommend(user_id, n_recommendations, **kwargs)
+            # Marquer le fallback dans les métadonnées
+            if recommendations and isinstance(recommendations, list):
+                for rec in recommendations:
+                    rec['fallback_from'] = 'hybrid'
+            return recommendations
+
         # Collecter les recommandations de chaque approche
         all_recommendations = {}
         
