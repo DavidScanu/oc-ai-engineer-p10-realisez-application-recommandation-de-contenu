@@ -557,28 +557,342 @@ Via `/debug/data-stats` :
 - Performance des recommandeurs
 - État des clusters utilisateurs
 
-## Déploiement en production
+---
 
-### Préparation
+## Scénario de production : Ajout dynamique d'utilisateurs et d'articles
 
-1. **Configurer les variables d'environnement**
-2. **Utiliser Gunicorn** pour la production :
-```bash
-pip install gunicorn
-gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker
+### Vue d'ensemble
+
+L'application actuelle s'appuie sur des données statiques (fichiers CSV et pickle) qui représentent une **base de données figée** avec trois tables principales :
+- **`clicks`** : Interactions utilisateur-article (322K utilisateurs, 2.9M clics)
+- **`articles`** : Métadonnées des articles avec embeddings pré-calculés (364K articles)
+- **`users`** : Dérivée implicitement des interactions
+
+Dans un **scénario de production avec une vraie base de données**, voici ce qui se passerait lors de l'ajout de nouveaux utilisateurs et/ou articles.
+
+### 🆕 Ajout de nouveaux utilisateurs
+
+#### Comportement actuel : ✅ **Géré automatiquement**
+
+L'application gère très bien l'ajout de nouveaux utilisateurs grâce au **système de cold start** :
+
+**Phase 1 : Nouvel utilisateur sans historique**
+```
+Utilisateur 999999 (nouveau)
+→ Méthode "Similarité de contenu" : ✅ Fallback automatique sur "popularité"
+→ Méthode "Clustering" : ✅ Fallback automatique sur "popularité"
+→ Méthode "Hybride" : ✅ Combine les fallbacks (popularité prédominante)
+→ Résultat : Recommandations basées sur les tendances actuelles
 ```
 
-3. **Ajouter un reverse proxy** (nginx) pour les performances
-4. **Configurer CORS** selon vos domaines frontend
-
-### Docker (optionnel)
-
-```dockerfile
-FROM python:3.10-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+**Phase 2 : Premières interactions (1-2 articles)**
 ```
+Utilisateur 999999 (3 clics)
+→ Méthode "Similarité de contenu" : ⚠️ Profil utilisateur limité, mais fonctionnel
+→ Méthode "Clustering" : ⚠️ Pas encore dans les clusters (recalcul toutes les 24h)
+→ Résultat : Recommandations basées sur les premiers articles lus
+```
+
+**Phase 3 : Utilisateur actif (>3 interactions)**
+```
+Utilisateur 999999 (15 clics)
+→ Méthode "Similarité de contenu" : ✅ Profil utilisateur riche (moyenne des embeddings consultés)
+→ Méthode "Clustering" : ✅ Assigné à un cluster (après recalcul quotidien)
+→ Résultat : Recommandations personnalisées complètes
+```
+
+#### Architecture en production
+
+**Avec une base de données SQL/NoSQL** :
+1. **Insertion en temps réel** : Chaque clic → `INSERT INTO clicks (user_id, article_id, timestamp)`
+2. **Profil utilisateur dynamique** : Recalculé à chaque requête à partir de l'historique récent
+3. **Mise à jour des clusters** :
+   - **Option A (batch)** : Recalcul quotidien des clusters (config actuelle : 24h)
+   - **Option B (streaming)** : Assignation dynamique des nouveaux utilisateurs au cluster le plus proche
+   - **Option C (hybride)** : Assignation temporaire + réassignation lors du batch quotidien
+
+**Exemple de requête SQL pour le profil utilisateur** :
+```sql
+-- Récupérer les 10 derniers articles consultés
+SELECT article_id
+FROM clicks
+WHERE user_id = 999999
+ORDER BY timestamp DESC
+LIMIT 10;
+
+-- Calculer le profil utilisateur (moyenne des embeddings)
+-- → Effectué en Python après récupération des embeddings
+```
+
+**Impact sur les performances** :
+- ✅ **Faible** : Les nouveaux utilisateurs n'affectent pas les performances globales
+- ⚠️ **Recalcul des clusters** : Coût computationnel proportionnel au nombre total d'utilisateurs
+  - Actuel : ~322K utilisateurs → ~30s de calcul
+  - Production (1M utilisateurs) → Envisager un clustering incrémental ou un échantillonnage
+
+### 📄 Ajout de nouveaux articles
+
+#### Comportement actuel : ⚠️ **Limitations majeures**
+
+L'ajout de nouveaux articles pose des **défis critiques** en raison des embeddings statiques :
+
+**Problème 1 : Embeddings manquants**
+```
+Nouvel article ID 400000 (publié aujourd'hui)
+→ Métadonnées : ✅ Chargées depuis articles_metadata.csv
+→ Embeddings : ❌ Absents (fichier articles_embeddings.pickle figé)
+→ Conséquence :
+   - Méthode "Similarité de contenu" : ❌ L'article ne peut PAS être recommandé (embeddings requis)
+   - Méthode "Popularité" : ✅ Fonctionne (ne dépend pas des embeddings)
+   - Méthode "Clustering" : ✅ Fonctionne (popularité dans les clusters, pas d'embeddings requis)
+```
+
+**Problème 2 : Cold start des articles sans interactions**
+- Un nouvel article sans aucun clic aura un score de popularité nul (0 clics / âge)
+- Risque : Article peu visible tant qu'il n'a pas reçu ses premières interactions
+- ⚠️ **Important** : Contrairement aux méthodes basées sur les embeddings, la méthode "Popularité" peut théoriquement recommander l'article dès qu'il reçoit son premier clic (le score devient > 0)
+- Pour les articles très récents avec quelques clics, la normalisation par âge leur donne un avantage (ex: 10 clics en 1 jour vs 100 clics en 30 jours)
+
+**Problème 3 : Désynchronisation des données**
+- Les embeddings sont indexés par `article_id` (0 à 363,046)
+- Un nouvel article ID 400000 est **hors des limites du tableau NumPy**
+- Risque : `IndexError` ou résultats corrompus
+
+#### Architecture recommandée en production
+
+Pour gérer efficacement l'ajout d'articles, plusieurs adaptations sont nécessaires :
+
+##### 1. Pipeline de génération d'embeddings en temps réel
+
+**Option A : Génération à la publication**
+```python
+# Lors de l'ajout d'un nouvel article dans la BDD
+new_article = {
+    "article_id": 400000,
+    "content": "Texte de l'article...",
+    "category_id": 281,
+    "words_count": 250
+}
+
+# Générer l'embedding immédiatement
+embedding = generate_embedding(new_article["content"])  # Modèle pré-entraîné
+
+# Insérer dans la BDD
+db.execute("""
+    INSERT INTO articles (article_id, category_id, words_count, embedding)
+    VALUES (%s, %s, %s, %s)
+""", (new_article["article_id"], new_article["category_id"],
+      new_article["words_count"], embedding.tobytes()))
+```
+
+**Option B : Génération en batch différé**
+```python
+# Toutes les heures, traiter les articles sans embeddings
+pending_articles = db.execute("""
+    SELECT article_id, content
+    FROM articles
+    WHERE embedding IS NULL
+""")
+
+for article in pending_articles:
+    embedding = generate_embedding(article["content"])
+    db.execute("""
+        UPDATE articles
+        SET embedding = %s
+        WHERE article_id = %s
+    """, (embedding.tobytes(), article["article_id"]))
+```
+
+**Technologies recommandées** :
+- **Modèle d'embeddings** : Sentence-BERT (multilingual), USE (Universal Sentence Encoder)
+- **Infrastructure** :
+  - API de génération (FastAPI + GPU)
+  - Queue de traitement (Celery + Redis)
+  - Cache des embeddings (Redis ou Memcached)
+
+##### 2. Stratégie de cold start pour nouveaux articles
+
+**Solution 1 : Boost temporaire de nouveauté**
+```python
+# Ajouter un bonus de popularité pour les nouveaux articles
+article_age_hours = (now - article.created_at).total_seconds() / 3600
+
+if article_age_hours < 24:  # Moins de 24h
+    novelty_boost = 1.5  # +50% de score
+elif article_age_hours < 72:  # 1-3 jours
+    novelty_boost = 1.2  # +20% de score
+else:
+    novelty_boost = 1.0  # Pas de bonus
+
+final_score = popularity_score * novelty_boost
+```
+
+**Solution 2 : Recommandations "Articles récents" dédiées**
+```python
+# Endpoint spécifique pour les nouveautés
+@app.get("/articles/recent")
+def get_recent_articles(category: Optional[int] = None):
+    """Retourne les articles publiés dans les dernières 48h"""
+    cutoff = datetime.now() - timedelta(hours=48)
+    recent = db.query(Article).filter(Article.created_at >= cutoff)
+    if category:
+        recent = recent.filter(Article.category_id == category)
+    return recent.order_by(Article.created_at.desc()).limit(10)
+```
+
+**Solution 3 : Recommandations par similarité de métadonnées**
+```python
+# Si embedding manquant, utiliser les métadonnées (catégorie, mots-clés)
+def recommend_without_embedding(user_id, new_article_id):
+    # Récupérer les catégories préférées de l'utilisateur
+    user_top_categories = get_user_top_categories(user_id)
+
+    # Recommander le nouvel article si dans ces catégories
+    new_article = get_article(new_article_id)
+    if new_article.category_id in user_top_categories:
+        return True  # Recommander
+    return False
+```
+
+##### 3. Gestion de la cohérence des données
+
+**Architecture base de données recommandée** :
+
+```sql
+-- Table articles avec embeddings
+CREATE TABLE articles (
+    article_id BIGINT PRIMARY KEY,
+    category_id INT NOT NULL,
+    publisher_id INT,
+    words_count INT,
+    created_at TIMESTAMP NOT NULL,
+    embedding VECTOR(250),  -- Type natif PostgreSQL avec pgvector
+    INDEX idx_category (category_id),
+    INDEX idx_created_at (created_at)
+);
+
+-- Table clicks (interactions)
+CREATE TABLE clicks (
+    click_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    article_id BIGINT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user (user_id),
+    INDEX idx_article (article_id),
+    INDEX idx_timestamp (timestamp),
+    FOREIGN KEY (article_id) REFERENCES articles(article_id)
+);
+
+-- Table user_clusters (mise à jour quotidienne)
+CREATE TABLE user_clusters (
+    user_id BIGINT PRIMARY KEY,
+    cluster_id INT NOT NULL,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_cluster (cluster_id)
+);
+
+-- Vue matérialisée pour la popularité (rafraîchie toutes les heures)
+CREATE MATERIALIZED VIEW article_popularity AS
+SELECT
+    article_id,
+    COUNT(DISTINCT user_id) AS unique_users,
+    COUNT(*) AS total_clicks,
+    MAX(timestamp) AS last_interaction
+FROM clicks
+WHERE timestamp >= NOW() - INTERVAL '7 days'
+GROUP BY article_id;
+```
+
+**Avantages de PostgreSQL + pgvector** :
+- ✅ Stockage natif des embeddings (type `VECTOR`)
+- ✅ Recherche de similarité en SQL : `ORDER BY embedding <-> query_embedding LIMIT 10`
+- ✅ Index HNSW pour recherche approximative rapide (millions d'articles)
+- ✅ Transactions ACID pour cohérence des données
+
+##### 4. Mise à jour incrémentale des recommandeurs
+
+**Clustering : Stratégie hybride**
+```python
+class IncrementalClusteringRecommender:
+    def assign_new_user_to_cluster(self, user_id: int) -> int:
+        """Assigne un nouvel utilisateur au cluster le plus proche"""
+        # Construire les features du nouvel utilisateur
+        user_features = self._build_user_features([user_id])
+        user_features_scaled = self._scaler.transform(user_features)
+
+        # Prédire le cluster (pas de réentraînement)
+        cluster = self._cluster_model.predict(user_features_scaled)[0]
+
+        # Sauvegarder l'assignation temporaire
+        db.execute("""
+            INSERT INTO user_clusters (user_id, cluster_id, temporary)
+            VALUES (%s, %s, TRUE)
+        """, (user_id, cluster))
+
+        return cluster
+
+    def retrain_clusters_batch(self):
+        """Réentraînement complet des clusters (quotidien)"""
+        # Marquer toutes les assignations comme définitives
+        self._train_clusters()  # Méthode actuelle
+
+        db.execute("""
+            UPDATE user_clusters SET temporary = FALSE
+        """)
+```
+
+**Content-based : Rechargement dynamique**
+```python
+class DynamicContentRecommender:
+    def load_article_embedding(self, article_id: int) -> np.ndarray:
+        """Charge l'embedding d'un article depuis la BDD"""
+        # Cache en mémoire (LRU)
+        if article_id in self._embedding_cache:
+            return self._embedding_cache[article_id]
+
+        # Requête BDD
+        result = db.execute("""
+            SELECT embedding FROM articles WHERE article_id = %s
+        """, (article_id,))
+
+        if result:
+            embedding = np.frombuffer(result[0], dtype=np.float32)
+            self._embedding_cache[article_id] = embedding
+            return embedding
+        else:
+            raise ValueError(f"Embedding manquant pour article {article_id}")
+```
+
+### 📊 Tableau récapitulatif : Ajout d'utilisateurs vs. Articles
+
+| Aspect | **Nouvel utilisateur** | **Nouvel article** |
+|--------|------------------------|---------------------|
+| **Gestion actuelle** | ✅ Excellente (cold start) | ❌ Problématique (embeddings statiques) |
+| **Délai avant recommandations** | ✅ Immédiat (fallback popularité) | ⚠️ Après premières interactions + embedding généré |
+| **Impact sur "Clustering"** | ⚠️ Assignation différée (24h) | ➖ Aucun (clusters basés sur utilisateurs) |
+| **Impact sur "Similarité de contenu"** | ✅ Profil dès 1ère interaction | ❌ Impossible sans embedding |
+| **Impact sur "Popularité"** | ✅ Fonctionne immédiatement | ⚠️ Score nul jusqu'à premières interactions |
+| **Coût computationnel** | ⚠️ Moyen (recalcul clusters quotidien) | 🔥 Élevé (génération embeddings) |
+| **Adaptation BDD requise** | ✅ Minime (INSERT dans clicks) | 🔥 Majeure (pipeline embeddings) |
+
+### 🚀 Recommandations pour la mise en production
+
+#### Phase 1 : Migration vers une base de données
+1. **PostgreSQL + pgvector** pour le stockage des embeddings
+2. **Vues matérialisées** pour les calculs de popularité (rafraîchies toutes les heures)
+3. **Index optimisés** sur `user_id`, `article_id`, `timestamp`
+
+#### Phase 2 : Pipeline d'embeddings
+1. **Service de génération** : API dédiée avec GPU (FastAPI + Sentence-BERT)
+2. **Queue de traitement** : Celery + Redis pour traiter les nouveaux articles en asynchrone
+3. **Fallback temporaire** : Recommandations par métadonnées en attendant l'embedding
+
+#### Phase 3 : Optimisation des clusters
+1. **Clustering incrémental** : Assignation immédiate des nouveaux utilisateurs
+2. **Réentraînement adaptatif** : Quotidien si < 100K users, hebdomadaire au-delà
+3. **Monitoring** : Tracker la stabilité des clusters (taux de réassignation)
+
+#### Phase 4 : Gestion du cold start des articles
+1. **Boost de nouveauté** : Bonus temporaire pour articles récents (24-72h)
+2. **Section dédiée** : "Nouveaux articles" dans l'interface utilisateur
+3. **A/B testing** : Tester différentes stratégies de promotion des nouveaux contenus

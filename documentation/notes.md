@@ -35,11 +35,4 @@
 - ✅ **Normaliser** sur la période d'existence de l'article (pour enlever le filtre de récence, 3 mois). Ex : si l’article à 8 mois, on divise par le nombre de mois.
 - Ajouter un paramètre de nouveauté
 - ✅ **Nouvel utilisateur** : Quand on entre un ID utilisateur qui n’existe pas, quelle méthode de recommandation ? Popularité.
-
-## **Nouveaux articles** 
-
-* Ajouter à la base de donnée
-  * table : articles
-  * table : clicks
-* Créer l’embedding
-* Il rentre automatiquement dans le contenu recommandé
+- ✅ Explication de ce qu'il se passe en cas de nouvel utilisateur (cold start) et de nouvel article dans la documentation.
