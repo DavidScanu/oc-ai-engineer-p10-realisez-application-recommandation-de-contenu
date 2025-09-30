@@ -165,24 +165,43 @@ Article B (1 mois)  : 150 clics → score = 150/1 = 150 clics/mois
 
 ### Gestion du cold start (utilisateurs nouveaux/inconnus)
 
-Le système gère automatiquement le problème du **cold start** pour les utilisateurs sans historique :
+Le système gère automatiquement le problème du **cold start** pour les utilisateurs avec un historique insuffisant ou invalide :
+
+#### Détection intelligente du cold start
+
+Le système utilise une **approche en deux étapes** pour détecter le cold start :
+
+1. **Vérification quantitative** : L'utilisateur doit avoir au moins `MIN_USER_INTERACTIONS` interactions (défaut: **5**)
+2. **Validation qualitative** : Les `click_article_id` doivent être valides (présents dans les métadonnées)
+
+**Exemples de scénarios** :
+
+| Scénario utilisateur | Interactions totales | Interactions valides | Comportement |
+|---------------------|---------------------|---------------------|--------------|
+| Utilisateur nouveau | 0 | 0 | ✅ Fallback vers popularité |
+| Peu d'historique | 2 | 2 | ✅ Fallback vers popularité (< 5) |
+| Historique suffisant | 10 | 10 | ✅ Recommandations personnalisées |
+| Données corrompues | 10 | 0 | ✅ Fallback vers popularité (IDs invalides) |
+| Historique partiel | 6 | 3 | ✅ Fallback vers popularité (3 valides < 5) |
 
 **Comportement par méthode** :
 
-| Méthode | Comportement pour utilisateur inexistant |
+| Méthode | Comportement pour historique insuffisant |
 |---------|------------------------------------------|
 | **Popularité** | ✅ Fonctionne directement (ne dépend pas de l'utilisateur) |
-| **Similarité de contenu** | ✅ Fallback automatique sur Popularité |
-| **Clustering** | ✅ Fallback automatique sur Popularité |
-| **Hybride** | ✅ Fallback automatique sur Popularité |
+| **Similarité de contenu** | ✅ Fallback automatique sur Popularité si < 5 interactions valides |
+| **Clustering** | ✅ Fallback automatique sur Popularité si < 5 interactions valides |
+| **Hybride** | ✅ Fallback automatique sur Popularité si < 5 interactions valides |
 
-**Avantages** :
-- ✅ **Aucune erreur** pour un utilisateur inexistant
+**Avantages de cette approche** :
+- ✅ **Robustesse** : Gère les données corrompues ou invalides
+- ✅ **Qualité** : Évite les recommandations basées sur trop peu de données
+- ✅ **Aucune erreur** : Fallback automatique au lieu de retourner des listes vides
 - ✅ **Recommandations cohérentes** basées sur les tendances actuelles
-- ✅ **Expérience utilisateur continue** même sans historique
-- ✅ **Logs explicites** pour faciliter le débogage (ex: "User {id} inconnu, fallback sur popularité (cold start)")
+- ✅ **Logs explicites** : Indique le nombre d'interactions valides et le seuil minimum
+- ✅ **Configurable** : Ajustez `MIN_USER_INTERACTIONS` dans `config.py` (valeurs recommandées : 3-10)
 
-**Exemple** : Si vous demandez des recommandations pour l'utilisateur ID 999999 qui n'existe pas, le système retournera automatiquement les articles les plus populaires (normalisés par âge) sans lever d'erreur.
+**Exemple** : Si un utilisateur a 3 interactions dont seulement 2 sont valides, le système appliquera automatiquement un fallback vers la méthode popularité, car 2 < 5 (seuil minimum).
 
 #### Transparence du fallback dans les réponses API
 
@@ -200,14 +219,15 @@ Lorsqu'un fallback est appliqué, l'API indique clairement cette information **�
       "score": 25046.71428571429,
       "reason": "Article populaire (#1) - 34145 utilisateurs, 37213 clics",
       "metadata": {...},
-      "fallback_from": "content"
+      "fallback_from": "content",
+      "fallback_reason": "insufficient_valid_history"
     }
   ],
   "metadata": {
     "requested_method": "content",
     "actual_method": "popularity",
     "fallback_applied": true,
-    "fallback_reason": "Cold start: utilisateur sans historique, fallback de 'content' vers 'popularity'",
+    "fallback_reason": "Cold start: utilisateur avec moins de 5 interactions valides (0 détectées), fallback de 'content' vers 'popularity'",
     "user_stats": {
       "user_id": 999999,
       "total_interactions": 0,
@@ -232,10 +252,11 @@ Lorsqu'un fallback est appliqué, l'API indique clairement cette information **�
 - `requested_method` : La méthode initialement demandée par l'utilisateur
 - `actual_method` : La méthode réellement utilisée (identique si pas de fallback)
 - `fallback_applied` : Boolean indiquant si un fallback a été effectué
-- `fallback_reason` : Explication détaillée du pourquoi du fallback (uniquement si fallback appliqué)
+- `fallback_reason` : Explication détaillée du pourquoi du fallback, incluant le nombre d'interactions valides détectées et le seuil minimum requis (uniquement si fallback appliqué)
 
 **Champs ajoutés dans chaque recommandation** :
-- `fallback_from` : Indique la méthode d'origine qui a déclenché le fallback (uniquement si fallback appliqué)
+- `fallback_from` : Indique la méthode d'origine qui a déclenché le fallback
+- `fallback_reason` : Code court identifiant la raison (`insufficient_valid_history`)
 
 **Exemple sans fallback (utilisateur existant)** :
 ```json
@@ -574,7 +595,8 @@ backend/
 MAX_ARTICLE_AGE_DAYS = 730       # Âge maximum des articles (jours)
 MIN_WORDS_COUNT = 50             # Nombre minimum de mots par article
 N_USER_CLUSTERS = 5              # Nombre de segments utilisateurs
-MIN_USER_INTERACTIONS = 3         # Seuil pour "nouveaux utilisateurs"
+MIN_USER_INTERACTIONS = 5        # Seuil pour cold start (interactions valides requises)
+                                 # Valeurs recommandées : 3 (permissif), 5 (équilibré), 10 (conservateur)
 
 # Poids de l'approche hybride
 HYBRID_WEIGHTS = {
@@ -642,21 +664,25 @@ Utilisateur 999999 (nouveau)
 → Résultat : Recommandations basées sur les tendances actuelles
 ```
 
-**Phase 2 : Premières interactions (1-2 articles)**
+**Phase 2 : Premières interactions (1-4 clics valides)**
 ```
-Utilisateur 999999 (3 clics)
-→ Méthode "Similarité de contenu" : ⚠️ Profil utilisateur limité, mais fonctionnel
-→ Méthode "Clustering" : ⚠️ Pas encore dans les clusters (recalcul toutes les 24h)
-→ Résultat : Recommandations basées sur les premiers articles lus
+Utilisateur 999999 (3 clics valides)
+→ Méthode "Similarité de contenu" : ✅ Fallback sur popularité (< 5 interactions requises)
+→ Méthode "Clustering" : ✅ Fallback sur popularité (< 5 interactions requises)
+→ Méthode "Hybride" : ✅ Fallback sur popularité
+→ Résultat : Recommandations basées sur les tendances actuelles
 ```
 
-**Phase 3 : Utilisateur actif (>3 interactions)**
+**Phase 3 : Utilisateur actif (≥5 interactions valides)**
 ```
-Utilisateur 999999 (15 clics)
+Utilisateur 999999 (15 clics valides)
 → Méthode "Similarité de contenu" : ✅ Profil utilisateur riche (moyenne des embeddings consultés)
 → Méthode "Clustering" : ✅ Assigné à un cluster (après recalcul quotidien)
+→ Méthode "Hybride" : ✅ Combinaison des 3 méthodes avec pondération
 → Résultat : Recommandations personnalisées complètes
 ```
+
+**Note importante** : Le système valide automatiquement les `click_article_id` pour s'assurer qu'ils existent dans les métadonnées. Seules les interactions valides sont comptabilisées pour déterminer le seuil de cold start.
 
 #### Architecture en production
 

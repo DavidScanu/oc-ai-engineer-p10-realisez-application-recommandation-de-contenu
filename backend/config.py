@@ -24,8 +24,9 @@ class Settings(BaseSettings):
         "diversity": 0.1
     }
     
-    # Seuil pour nouveaux utilisateurs
-    MIN_USER_INTERACTIONS: int = 3
+    # Seuil pour nouveaux utilisateurs (cold start)
+    # Valeurs recommandées : 3 (permissif), 5 (équilibré), 10 (conservateur)
+    MIN_USER_INTERACTIONS: int = 5
     
     # Fréquence de mise à jour des clusters (en heures)
     CLUSTER_UPDATE_FREQUENCY_HOURS: int = 24

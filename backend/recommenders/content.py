@@ -18,12 +18,13 @@ class ContentRecommender(BaseRecommender):
     def recommend(self, user_id: int, n_recommendations: int = 5, **kwargs) -> List[Dict[str, Any]]:
         """Recommande des articles similaires à ceux consultés par l'utilisateur"""
         logger.info(f"📖 Recommandation par contenu pour user {user_id}")
-        
-        # Récupérer l'historique utilisateur
-        user_history = self.data_loader.get_user_history(user_id, limit=10)  # 10 derniers articles
-        
-        if len(user_history) == 0:
-            logger.warning(f"⚠️ Aucun historique pour user {user_id}, fallback sur popularité")
+
+        # Vérifier si l'utilisateur a suffisamment d'historique VALIDE
+        if not self._has_sufficient_history(user_id):
+            logger.warning(
+                f"⚠️ User {user_id} : historique insuffisant ou invalide, "
+                f"fallback vers popularité (cold start)"
+            )
             # Fallback sur popularité pour nouveaux utilisateurs
             from .popularity import PopularityRecommender
             fallback = PopularityRecommender(self.data_loader)
@@ -32,6 +33,7 @@ class ContentRecommender(BaseRecommender):
             if recommendations and isinstance(recommendations, list):
                 for rec in recommendations:
                     rec['fallback_from'] = 'content'
+                    rec['fallback_reason'] = 'insufficient_valid_history'
             return recommendations
         
         # Charger les embeddings et métadonnées
@@ -43,16 +45,24 @@ class ContentRecommender(BaseRecommender):
             logger.warning(f"⚠️ Aucun article disponible pour user {user_id}")
             return []
         
-        # Calculer le profil utilisateur (moyenne des embeddings des articles vus)
-        user_articles = user_history['click_article_id'].tolist()
+        # Récupérer les article_id VALIDES de l'historique
+        user_articles = self._get_valid_user_article_ids(user_id)
+
+        # Double vérification (ne devrait jamais arriver grâce à _has_sufficient_history)
+        if len(user_articles) == 0:
+            logger.error(f"⚠️ User {user_id} : aucun article valide trouvé (cas anormal)")
+            return []
+
+        # Calculer les embeddings pour ces articles
         user_embeddings = []
-        
+
         for article_id in user_articles:
-            if article_id < len(embeddings):  # Vérifier que l'ID est valide
+            if article_id < len(embeddings):  # Sécurité supplémentaire
                 user_embeddings.append(embeddings[article_id])
-        
+
+        # Cette condition ne devrait plus être nécessaire, mais on la garde par sécurité
         if len(user_embeddings) == 0:
-            logger.warning(f"⚠️ Aucun embedding trouvé pour les articles de user {user_id}")
+            logger.error(f"⚠️ Aucun embedding trouvé pour user {user_id} (cas anormal)")
             return []
         
         # Profil utilisateur = moyenne des embeddings

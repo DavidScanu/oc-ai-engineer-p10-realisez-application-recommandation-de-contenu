@@ -53,11 +53,61 @@ class BaseRecommender(ABC):
     def _get_available_articles(self, user_id: int, exclude_seen: bool = True) -> pd.DataFrame:
         """Récupère les articles disponibles pour recommandation"""
         recommendable = self.data_loader.get_recommendable_articles()
-        
+
         if exclude_seen:
             seen_articles = self._get_user_seen_articles(user_id)
             available = recommendable[~recommendable['article_id'].isin(seen_articles)]
             logger.debug(f"👤 User {user_id}: {len(recommendable)} articles → {len(available)} non vus")
             return available
-        
+
         return recommendable
+
+    def _get_valid_user_article_ids(self, user_id: int) -> List[int]:
+        """
+        Récupère les article_id VALIDES de l'historique utilisateur.
+
+        Valide = article_id existe dans les métadonnées
+
+        Returns:
+            Liste des article_id valides (peut être vide)
+        """
+        user_history = self.data_loader.get_user_history(user_id)
+
+        if len(user_history) == 0:
+            return []
+
+        # Vérifier que les article_id existent dans les données
+        metadata = self.data_loader.load_articles_metadata()
+        valid_article_ids = set(metadata['article_id'].tolist())
+
+        # Filtrer l'historique pour ne garder que les IDs valides
+        valid_history = user_history[
+            user_history['click_article_id'].isin(valid_article_ids)
+        ]
+
+        return valid_history['click_article_id'].tolist()
+
+    def _has_sufficient_history(self, user_id: int) -> bool:
+        """
+        Vérifie si l'utilisateur a suffisamment d'historique VALIDE.
+
+        Combine :
+        - Quantité : >= MIN_USER_INTERACTIONS
+        - Qualité : click_article_id valides uniquement
+
+        Returns:
+            True si suffisant, False si fallback nécessaire
+        """
+        from config import settings
+
+        valid_articles = self._get_valid_user_article_ids(user_id)
+        has_enough = len(valid_articles) >= settings.MIN_USER_INTERACTIONS
+
+        if not has_enough:
+            logger.info(
+                f"User {user_id}: insufficient valid history "
+                f"({len(valid_articles)} valid articles, "
+                f"minimum: {settings.MIN_USER_INTERACTIONS})"
+            )
+
+        return has_enough

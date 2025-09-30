@@ -218,10 +218,12 @@ class ClusteringRecommender(BaseRecommender):
         """Recommande des articles populaires dans le cluster de l'utilisateur"""
         logger.info(f"👥 Recommandation par clustering pour user {user_id}")
 
-        # Vérifier si l'utilisateur existe
-        user_history = self.data_loader.get_user_history(user_id)
-        if len(user_history) == 0:
-            logger.warning(f"⚠️ User {user_id} inconnu, fallback sur popularité (cold start)")
+        # Vérifier si l'utilisateur a suffisamment d'historique VALIDE
+        if not self._has_sufficient_history(user_id):
+            logger.warning(
+                f"⚠️ User {user_id} : historique insuffisant ou invalide, "
+                f"fallback vers popularité (cold start)"
+            )
             # Fallback sur popularité pour nouveaux utilisateurs (cold start)
             from .popularity import PopularityRecommender
             fallback = PopularityRecommender(self.data_loader)
@@ -230,6 +232,7 @@ class ClusteringRecommender(BaseRecommender):
             if recommendations and isinstance(recommendations, list):
                 for rec in recommendations:
                     rec['fallback_from'] = 'clustering'
+                    rec['fallback_reason'] = 'insufficient_valid_history'
             return recommendations
 
         # Récupérer le cluster de l'utilisateur

@@ -29,16 +29,19 @@ class HybridRecommender(BaseRecommender):
         weights = settings.HYBRID_WEIGHTS
         exclude_seen = kwargs.get('exclude_seen', True)
 
-        # Vérifier si l'utilisateur a un historique (cold start detection)
-        user_history = self.data_loader.get_user_history(user_id)
-        if len(user_history) == 0:
-            logger.warning(f"⚠️ User {user_id} sans historique, fallback hybride vers popularité (cold start)")
+        # Vérifier si l'utilisateur a suffisamment d'historique VALIDE (cold start detection)
+        if not self._has_sufficient_history(user_id):
+            logger.warning(
+                f"⚠️ User {user_id} : historique insuffisant ou invalide, "
+                f"fallback hybride vers popularité (cold start)"
+            )
             # Fallback direct vers popularité
             recommendations = self.popularity_rec.recommend(user_id, n_recommendations, **kwargs)
             # Marquer le fallback dans les métadonnées
             if recommendations and isinstance(recommendations, list):
                 for rec in recommendations:
                     rec['fallback_from'] = 'hybrid'
+                    rec['fallback_reason'] = 'insufficient_valid_history'
             return recommendations
 
         # Collecter les recommandations de chaque approche
