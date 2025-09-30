@@ -4,9 +4,9 @@
 Script de test pour valider la gestion du cold start avec validation des interactions.
 
 Tests :
-1. Utilisateur inexistant (0 interactions) → fallback
-2. Utilisateur avec peu d'interactions valides (< MIN_USER_INTERACTIONS) → fallback
-3. Utilisateur avec assez d'interactions valides (≥ MIN_USER_INTERACTIONS) → personnalisé
+1. Utilisateur inexistant (0 articles lus) → fallback
+2. Utilisateur avec peu d'articles uniques lus (< MIN_UNIQUE_ARTICLES_READ) → fallback
+3. Utilisateur avec assez d'articles uniques lus (≥ MIN_UNIQUE_ARTICLES_READ) → personnalisé
 4. Cas limite : interactions invalides (article_id inexistants)
 """
 
@@ -90,16 +90,12 @@ class ColdStartTester:
             print(f"     • Méthode réelle: {actual_method}")
             print(f"     • Nombre de recommandations: {len(recommendations)}")
 
-            if fallback_applied:
-                fallback_reason = metadata.get('fallback_reason', 'N/A')
+            # Afficher fallback_reason (toujours présent)
+            fallback_reason = metadata.get('fallback_reason')
+            if fallback_reason:
                 print(f"     • Raison du fallback: {fallback_reason}")
-
-                # Vérifier les métadonnées dans les recommandations
-                if recommendations:
-                    first_rec = recommendations[0]
-                    if 'fallback_from' in first_rec:
-                        print(f"     • Fallback détecté depuis: {first_rec['fallback_from']}")
-                        print(f"     • Raison courte: {first_rec.get('fallback_reason', 'N/A')}")
+            else:
+                print(f"     • Raison du fallback: None (pas de fallback)")
 
             # Validation
             test_passed = True
@@ -138,15 +134,17 @@ class ColdStartTester:
                 if 'fallback_reason' not in metadata:
                     self.print_error("Champ 'fallback_reason' manquant dans metadata")
                     test_passed = False
-
-                if recommendations:
-                    first_rec = recommendations[0]
-                    if 'fallback_from' not in first_rec:
-                        self.print_error("Champ 'fallback_from' manquant dans les recommandations")
-                        test_passed = False
-                    if 'fallback_reason' not in first_rec:
-                        self.print_error("Champ 'fallback_reason' manquant dans les recommandations")
-                        test_passed = False
+                elif metadata.get('fallback_reason') is None:
+                    self.print_error("Champ 'fallback_reason' ne devrait pas être None en cas de fallback")
+                    test_passed = False
+            else:
+                # Vérifier que fallback_reason est présent mais null si pas de fallback
+                if 'fallback_reason' not in metadata:
+                    self.print_error("Champ 'fallback_reason' devrait être présent même sans fallback")
+                    test_passed = False
+                elif metadata.get('fallback_reason') is not None:
+                    self.print_error("Champ 'fallback_reason' devrait être null sans fallback")
+                    test_passed = False
 
             if test_passed:
                 self.print_success(f"Test réussi pour méthode '{method}'")
@@ -195,10 +193,10 @@ class ColdStartTester:
         return all_passed
 
     def test_scenario_2_few_interactions(self):
-        """Test 2: Utilisateur avec peu d'interactions (< MIN_USER_INTERACTIONS)"""
-        self.print_section("TEST 2: Utilisateur avec peu d'interactions (< 5)")
+        """Test 2: Utilisateur avec peu d'articles uniques lus (< MIN_UNIQUE_ARTICLES_READ)"""
+        self.print_section("TEST 2: Utilisateur avec peu d'articles uniques lus (< 5)")
 
-        self.print_info("Recherche d'un utilisateur avec 1-4 interactions...")
+        self.print_info("Recherche d'un utilisateur avec 1-4 articles uniques lus...")
 
         # Récupérer des utilisateurs et trouver un avec peu d'interactions
         try:
@@ -206,20 +204,20 @@ class ColdStartTester:
             if response.status_code == 200:
                 users = response.json()
 
-                # Chercher un utilisateur avec peu d'interactions
+                # Chercher un utilisateur avec peu d'articles uniques lus
                 target_user = None
                 for user_id in users:
                     stats = self.get_user_stats(user_id)
-                    interactions = stats.get('total_interactions', 0)
-                    if 1 <= interactions < 5:
+                    unique_articles = stats.get('unique_articles', 0)
+                    if 1 <= unique_articles < 5:
                         target_user = user_id
-                        self.print_info(f"Utilisateur trouvé: {user_id} avec {interactions} interactions")
+                        self.print_info(f"Utilisateur trouvé: {user_id} avec {unique_articles} articles uniques lus")
                         break
 
                 if not target_user:
-                    self.print_warning("Aucun utilisateur avec 1-4 interactions trouvé dans les 100 premiers")
+                    self.print_warning("Aucun utilisateur avec 1-4 articles uniques lus trouvé dans les 100 premiers")
                     self.print_info("Création d'un scénario simulé...")
-                    self.test_results.append(("Test 2: Peu d'interactions", None))
+                    self.test_results.append(("Test 2: Peu d'articles uniques", None))
                     return None
 
                 # Tester les recommandations
@@ -237,48 +235,48 @@ class ColdStartTester:
 
                 all_passed = all(results)
                 if all_passed:
-                    self.print_success("✨ TEST 2 RÉUSSI: Fallback appliqué pour utilisateur avec peu d'interactions")
+                    self.print_success("✨ TEST 2 RÉUSSI: Fallback appliqué pour utilisateur avec peu d'articles uniques lus")
                 else:
                     self.print_error("💥 TEST 2 ÉCHOUÉ")
 
-                self.test_results.append(("Test 2: Peu d'interactions", all_passed))
+                self.test_results.append(("Test 2: Peu d'articles uniques", all_passed))
                 return all_passed
             else:
                 self.print_error(f"Impossible de récupérer la liste des utilisateurs: {response.status_code}")
-                self.test_results.append(("Test 2: Peu d'interactions", False))
+                self.test_results.append(("Test 2: Peu d'articles uniques", False))
                 return False
 
         except Exception as e:
             self.print_error(f"Erreur durant le test: {e}")
-            self.test_results.append(("Test 2: Peu d'interactions", False))
+            self.test_results.append(("Test 2: Peu d'articles uniques", False))
             return False
 
     def test_scenario_3_sufficient_interactions(self):
-        """Test 3: Utilisateur avec assez d'interactions (≥ MIN_USER_INTERACTIONS)"""
-        self.print_section("TEST 3: Utilisateur avec interactions suffisantes (≥ 5)")
+        """Test 3: Utilisateur avec assez d'articles uniques lus (≥ MIN_UNIQUE_ARTICLES_READ)"""
+        self.print_section("TEST 3: Utilisateur avec articles uniques suffisants (≥ 5)")
 
-        self.print_info("Recherche d'un utilisateur avec ≥5 interactions...")
+        self.print_info("ID d'un utilisateur avec ≥5 articles uniques lus : 5890")
 
         try:
             response = requests.get(f"{self.base_url}/users?limit=100")
             if response.status_code == 200:
                 users = response.json()
 
-                # Chercher un utilisateur avec assez d'interactions
+                # Chercher un utilisateur avec assez d'articles uniques lus
                 target_user = None
                 # for user_id in users:
                 #     stats = self.get_user_stats(user_id)
-                #     interactions = stats.get('total_interactions', 0)
-                #     if interactions >= 5:
+                #     unique_articles = stats.get('unique_articles', 0)
+                #     if unique_articles >= 5:
                 #         target_user = user_id
-                #         self.print_info(f"Utilisateur trouvé: {user_id} avec {interactions} interactions")
+                #         self.print_info(f"Utilisateur trouvé: {user_id} avec {unique_articles} articles uniques lus")
                 #         break
 
                 target_user = 5890  # ID d'un utilisateur connu pour les tests
 
                 if not target_user:
-                    self.print_error("Aucun utilisateur avec ≥5 interactions trouvé")
-                    self.test_results.append(("Test 3: Interactions suffisantes", False))
+                    self.print_error("Aucun utilisateur avec ≥5 articles uniques lus trouvé")
+                    self.test_results.append(("Test 3: Articles uniques suffisants", False))
                     return False
 
                 # Tester les recommandations
@@ -302,16 +300,16 @@ class ColdStartTester:
                 else:
                     self.print_error("💥 TEST 3 ÉCHOUÉ")
 
-                self.test_results.append(("Test 3: Interactions suffisantes", all_passed))
+                self.test_results.append(("Test 3: Articles uniques suffisants", all_passed))
                 return all_passed
             else:
                 self.print_error(f"Impossible de récupérer la liste des utilisateurs: {response.status_code}")
-                self.test_results.append(("Test 3: Interactions suffisantes", False))
+                self.test_results.append(("Test 3: Articles uniques suffisants", False))
                 return False
 
         except Exception as e:
             self.print_error(f"Erreur durant le test: {e}")
-            self.test_results.append(("Test 3: Interactions suffisantes", False))
+            self.test_results.append(("Test 3: Articles uniques suffisants", False))
             return False
 
     def test_health(self) -> bool:

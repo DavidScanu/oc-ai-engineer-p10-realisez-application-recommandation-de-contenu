@@ -137,22 +137,28 @@ async def recommend_for_user(
         )
         
         # Détecter si un fallback a été appliqué
+        # Le fallback est détecté en vérifiant si l'utilisateur a un historique insuffisant
+        user_stats = data_loader.get_user_stats(user_id)
         fallback_applied = False
         actual_method = method
         fallback_reason = None
 
-        if recommendations and isinstance(recommendations, list) and len(recommendations) > 0:
-            if 'fallback_from' in recommendations[0]:
+        # Vérifier si cold start (seulement pour les méthodes qui utilisent l'historique)
+        if method in ["content", "clustering", "hybrid"]:
+            # Utiliser le recommender déjà instancié pour vérifier l'historique
+            if not recommender._has_sufficient_history(user_id):
                 fallback_applied = True
                 actual_method = 'popularity'
-                fallback_reason = f"Cold start: utilisateur sans historique, fallback de '{method}' vers 'popularity'"
+                unique_articles = user_stats.get('unique_articles', 0)
+                from config import settings
+                fallback_reason = f"Cold start: utilisateur avec moins de {settings.MIN_UNIQUE_ARTICLES_READ} articles uniques lus ({unique_articles} détectés), fallback de '{method}' vers 'popularity'"
 
         # Métadonnées sur la recommandation
-        user_stats = data_loader.get_user_stats(user_id)
         metadata = {
             "requested_method": method,
             "actual_method": actual_method,
             "fallback_applied": fallback_applied,
+            "fallback_reason": fallback_reason,  # Toujours présent (None si pas de fallback)
             "parameters": {
                 "n_recommendations": n_recommendations,
                 "exclude_seen": exclude_seen
@@ -160,9 +166,6 @@ async def recommend_for_user(
             "user_stats": user_stats,
             "results_count": len(recommendations)
         }
-
-        if fallback_reason:
-            metadata["fallback_reason"] = fallback_reason
 
         return RecommendationResponse(
             user_id=user_id,
@@ -400,7 +403,7 @@ async def get_config():
         "N_RECOMMENDATIONS": settings.N_RECOMMENDATIONS,
         "N_USER_CLUSTERS": settings.N_USER_CLUSTERS,
         "HYBRID_WEIGHTS": settings.HYBRID_WEIGHTS,
-        "MIN_USER_INTERACTIONS": settings.MIN_USER_INTERACTIONS
+        "MIN_UNIQUE_ARTICLES_READ": settings.MIN_UNIQUE_ARTICLES_READ
     }
 
 @app.get("/debug/data-stats", response_model=dict)

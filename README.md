@@ -171,41 +171,45 @@ Le système gère automatiquement le problème du **cold start** pour les utilis
 
 Le système utilise une **approche en deux étapes** pour détecter le cold start :
 
-1. **Vérification quantitative** : L'utilisateur doit avoir au moins `MIN_USER_INTERACTIONS` interactions (défaut: **5**)
+1. **Vérification quantitative** : L'utilisateur doit avoir lu au moins `MIN_UNIQUE_ARTICLES_READ` articles uniques (défaut: **5**)
 2. **Validation qualitative** : Les `click_article_id` doivent être valides (présents dans les métadonnées)
+
+**Exemple concret** :
+- Un utilisateur avec **50 clics sur le même article** = **1 seul article unique** → fallback
+- Un utilisateur avec **5 clics sur 5 articles différents** = **5 articles uniques** → recommandations personnalisées
 
 **Exemples de scénarios** :
 
-| Scénario utilisateur | Interactions totales | Interactions valides | Comportement |
-|---------------------|---------------------|---------------------|--------------|
-| Utilisateur nouveau | 0 | 0 | ✅ Fallback vers popularité |
-| Peu d'historique | 2 | 2 | ✅ Fallback vers popularité (< 5) |
-| Historique suffisant | 10 | 10 | ✅ Recommandations personnalisées |
-| Données corrompues | 10 | 0 | ✅ Fallback vers popularité (IDs invalides) |
-| Historique partiel | 6 | 3 | ✅ Fallback vers popularité (3 valides < 5) |
+| Scénario utilisateur | Clics totaux | Articles uniques lus | Comportement |
+|---------------------|--------------|----------------------|--------------|
+| Utilisateur nouveau | 0 | 0 | Fallback vers popularité |
+| Peu d'historique | 2 | 2 | Fallback vers popularité (< 5) |
+| Données corrompues | 10 | 0 | Fallback vers popularité (IDs invalides) |
+| Historique partiel | 6 | 3 | Fallback vers popularité (3 articles < 5) |
+| Historique suffisant | 10 | 10 | Recommandations personnalisées |
 
 **Comportement par méthode** :
 
 | Méthode | Comportement pour historique insuffisant |
 |---------|------------------------------------------|
 | **Popularité** | ✅ Fonctionne directement (ne dépend pas de l'utilisateur) |
-| **Similarité de contenu** | ✅ Fallback automatique sur Popularité si < 5 interactions valides |
-| **Clustering** | ✅ Fallback automatique sur Popularité si < 5 interactions valides |
-| **Hybride** | ✅ Fallback automatique sur Popularité si < 5 interactions valides |
+| **Similarité de contenu** | ✅ Fallback automatique sur Popularité si < 5 articles uniques lus |
+| **Clustering** | ✅ Fallback automatique sur Popularité si < 5 articles uniques lus |
+| **Hybride** | ✅ Fallback automatique sur Popularité si < 5 articles uniques lus |
 
 **Avantages de cette approche** :
 - ✅ **Robustesse** : Gère les données corrompues ou invalides
 - ✅ **Qualité** : Évite les recommandations basées sur trop peu de données
 - ✅ **Aucune erreur** : Fallback automatique au lieu de retourner des listes vides
 - ✅ **Recommandations cohérentes** basées sur les tendances actuelles
-- ✅ **Logs explicites** : Indique le nombre d'interactions valides et le seuil minimum
-- ✅ **Configurable** : Ajustez `MIN_USER_INTERACTIONS` dans `config.py` (valeurs recommandées : 3-10)
+- ✅ **Logs explicites** : Indique le nombre d'articles uniques lus et le seuil minimum
+- ✅ **Configurable** : Ajustez `MIN_UNIQUE_ARTICLES_READ` dans `config.py` (valeurs recommandées : 3-10)
 
-**Exemple** : Si un utilisateur a 3 interactions dont seulement 2 sont valides, le système appliquera automatiquement un fallback vers la méthode popularité, car 2 < 5 (seuil minimum).
+**Exemple** : Si un utilisateur a lu 3 articles dont seulement 2 sont valides (IDs existants), le système appliquera automatiquement un fallback vers la méthode popularité, car 2 < 5 (seuil minimum).
 
 #### Transparence du fallback dans les réponses API
 
-Lorsqu'un fallback est appliqué, l'API indique clairement cette information **à la fois au niveau racine ET dans les métadonnées** de la réponse :
+Lorsqu'un fallback est appliqué, l'API indique clairement cette information **au niveau racine ET dans les métadonnées** de la réponse :
 
 ```json
 {
@@ -218,16 +222,14 @@ Lorsqu'un fallback est appliqué, l'API indique clairement cette information **�
       "article_id": 160974,
       "score": 25046.71428571429,
       "reason": "Article populaire (#1) - 34145 utilisateurs, 37213 clics",
-      "metadata": {...},
-      "fallback_from": "content",
-      "fallback_reason": "insufficient_valid_history"
+      "metadata": {...}
     }
   ],
   "metadata": {
     "requested_method": "content",
     "actual_method": "popularity",
     "fallback_applied": true,
-    "fallback_reason": "Cold start: utilisateur avec moins de 5 interactions valides (0 détectées), fallback de 'content' vers 'popularity'",
+    "fallback_reason": "Cold start: utilisateur avec moins de 5 articles uniques lus (0 détectés), fallback de 'content' vers 'popularity'",
     "user_stats": {
       "user_id": 999999,
       "total_interactions": 0,
@@ -244,19 +246,15 @@ Lorsqu'un fallback est appliqué, l'API indique clairement cette information **�
 }
 ```
 
-**Champs ajoutés au niveau racine (accès rapide)** :
+**Champs de fallback au niveau racine (accès rapide)** :
 - `actual_method` : La méthode réellement utilisée après fallback
 - `fallback_applied` : Boolean indiquant si un fallback a été effectué
 
-**Champs ajoutés dans les métadonnées (détails)** :
+**Champs de fallback dans les métadonnées (détails complets)** :
 - `requested_method` : La méthode initialement demandée par l'utilisateur
 - `actual_method` : La méthode réellement utilisée (identique si pas de fallback)
 - `fallback_applied` : Boolean indiquant si un fallback a été effectué
-- `fallback_reason` : Explication détaillée du pourquoi du fallback, incluant le nombre d'interactions valides détectées et le seuil minimum requis (uniquement si fallback appliqué)
-
-**Champs ajoutés dans chaque recommandation** :
-- `fallback_from` : Indique la méthode d'origine qui a déclenché le fallback
-- `fallback_reason` : Code court identifiant la raison (`insufficient_valid_history`)
+- `fallback_reason` : Explication détaillée du pourquoi du fallback (toujours présent, `null` si pas de fallback)
 
 **Exemple sans fallback (utilisateur existant)** :
 ```json
@@ -277,7 +275,14 @@ Lorsqu'un fallback est appliqué, l'API indique clairement cette information **�
     "requested_method": "content",
     "actual_method": "content",
     "fallback_applied": false,
-    "user_stats": {...}
+    "fallback_reason": null,
+    "user_stats": {
+      "user_id": 5890,
+      "total_interactions": 1232,
+      "unique_articles": 1048,
+      "is_new_user": false,
+      ...
+    }
   }
 }
 ```
@@ -285,21 +290,10 @@ Lorsqu'un fallback est appliqué, l'API indique clairement cette information **�
 **Avantages de cette structure** :
 - ✅ **Accès facile** : `fallback_applied` et `actual_method` directement au niveau racine
 - ✅ **Détection automatique** : Les applications clientes peuvent vérifier le fallback sans parser les métadonnées
-- ✅ **Transparence complète** : Toutes les informations nécessaires sont disponibles
+- ✅ **Transparence complète** : Toutes les informations nécessaires sont disponibles au niveau global
 - ✅ **Compatibilité** : Les métadonnées conservent aussi ces informations pour les usages avancés
 - ✅ **Logging/Analytics** : Facilite le suivi des taux de fallback et la compréhension du comportement utilisateur
-
-**Utilisation côté client** :
-```javascript
-// Vérification simple
-if (response.fallback_applied) {
-  console.log(`Fallback détecté: ${response.method} → ${response.actual_method}`);
-  showMessage("Recommandations basées sur les tendances actuelles");
-}
-
-// Accès direct à la méthode réelle
-const effectiveMethod = response.actual_method;
-```
+- ✅ **Payload optimisé** : Les champs de fallback dans les recommandations ne sont présents que quand nécessaires (pas de duplication de `null`)
 
 ### Gestion adaptative des données
 
@@ -421,6 +415,8 @@ POST /recommend/{user_id}?method=hybrid&n_recommendations=5&exclude_seen=true
 {
   "user_id": 12345,
   "method": "hybrid",
+  "actual_method": "hybrid",
+  "fallback_applied": false,
   "recommendations": [
     {
       "article_id": 156789,
@@ -435,13 +431,18 @@ POST /recommend/{user_id}?method=hybrid&n_recommendations=5&exclude_seen=true
     }
   ],
   "metadata": {
-    "method": "hybrid",
+    "requested_method": "hybrid",
+    "actual_method": "hybrid",
+    "fallback_applied": false,
+    "fallback_reason": null,
     "user_stats": {
+      "user_id": 12345,
       "total_interactions": 23,
-      "unique_articles": 20
+      "unique_articles": 20,
+      "is_new_user": false
     }
   },
-  "generated_at": "2024-01-15T14:30:00"
+  "generated_at": "2025-09-30T14:30:00"
 }
 ```
 
@@ -595,7 +596,7 @@ backend/
 MAX_ARTICLE_AGE_DAYS = 730       # Âge maximum des articles (jours)
 MIN_WORDS_COUNT = 50             # Nombre minimum de mots par article
 N_USER_CLUSTERS = 5              # Nombre de segments utilisateurs
-MIN_USER_INTERACTIONS = 5        # Seuil pour cold start (interactions valides requises)
+MIN_UNIQUE_ARTICLES_READ = 5     # Seuil pour cold start (articles uniques lus requis)
                                  # Valeurs recommandées : 3 (permissif), 5 (équilibré), 10 (conservateur)
 
 # Poids de l'approche hybride

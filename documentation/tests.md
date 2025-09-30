@@ -38,13 +38,13 @@ python scripts/test_cold_start.py
 - ✅ Vérifie que la méthode `popularity` fonctionne **sans fallback**
 - ✅ Valide la présence des métadonnées de fallback (`fallback_applied`, `fallback_from`, `fallback_reason`)
 
-#### Test 2 : Utilisateur avec peu d'interactions (< 5)
-- ✅ Cherche automatiquement un utilisateur avec 1-4 interactions dans la base
+#### Test 2 : Utilisateur avec peu d'articles uniques lus (< 5)
+- ✅ Cherche automatiquement un utilisateur avec 1-4 articles uniques lus dans la base
 - ✅ Vérifie que **tous les fallbacks sont appliqués** même si l'utilisateur a un historique
-- ✅ Valide le seuil `MIN_USER_INTERACTIONS = 5`
+- ✅ Valide le seuil `MIN_UNIQUE_ARTICLES_READ = 5`
 
-#### Test 3 : Utilisateur avec interactions suffisantes (≥ 5)
-- ✅ Cherche automatiquement un utilisateur avec ≥5 interactions
+#### Test 3 : Utilisateur avec articles uniques suffisants (≥ 5)
+- ✅ Cherche automatiquement un utilisateur avec ≥5 articles uniques lus
 - ✅ Vérifie que les méthodes personnalisées fonctionnent **sans fallback**
 - ✅ Valide que les recommandations sont bien personnalisées
 
@@ -98,8 +98,8 @@ RÉSUMÉ FINAL DES TESTS
   Test                                              Résultat
   -------------------------------------------------- ---------------
   Test 1: Utilisateur inexistant                    ✅ RÉUSSI
-  Test 2: Peu d'interactions                        ✅ RÉUSSI
-  Test 3: Interactions suffisantes                  ✅ RÉUSSI
+  Test 2: Peu d'articles uniques                    ✅ RÉUSSI
+  Test 3: Articles uniques suffisants               ✅ RÉUSSI
 
   -------------------------------------------------- ---------------
 
@@ -149,25 +149,25 @@ L'API doit être accessible sur `http://localhost:8000`
 **Problème** : Le fallback ne se déclenche pas pour un utilisateur inexistant
 **Causes possibles** :
 - La condition `_has_sufficient_history()` n'est pas utilisée
-- `MIN_USER_INTERACTIONS` est configuré à 0
+- `MIN_UNIQUE_ARTICLES_READ` est configuré à 0
 
 #### Test 2 échoue
-**Problème** : Les utilisateurs avec < 5 interactions ne déclenchent pas le fallback
+**Problème** : Les utilisateurs avec < 5 articles uniques lus ne déclenchent pas le fallback
 **Causes possibles** :
-- `MIN_USER_INTERACTIONS` est < 1
+- `MIN_UNIQUE_ARTICLES_READ` est < 1
 - La validation des `click_article_id` n'est pas appliquée
 
 #### Test 3 échoue
-**Problème** : Les utilisateurs avec ≥ 5 interactions déclenchent un fallback
+**Problème** : Les utilisateurs avec ≥ 5 articles uniques lus déclenchent un fallback
 **Causes possibles** :
 - Les `click_article_id` sont invalides (pas dans les métadonnées)
-- Le seuil `MIN_USER_INTERACTIONS` est trop élevé
+- Le seuil `MIN_UNIQUE_ARTICLES_READ` est trop élevé
 
 ---
 
 ## 🔧 Configuration
 
-### Modifier l'URL de l'API
+### Modifier l'URL de l'API| Historique suffisant | 10 | 10 | Recommandations personnalisées |
 Si votre API tourne sur un port différent :
 ```bash
 # Dans le script
@@ -175,9 +175,9 @@ tester = ColdStartTester(base_url="http://localhost:8080")
 ```
 
 ### Modifier les seuils testés
-Pour tester avec un seuil différent de 5, modifiez `MIN_USER_INTERACTIONS` dans `backend/config.py` :
+Pour tester avec un seuil différent de 5, modifiez `MIN_UNIQUE_ARTICLES_READ` dans `backend/config.py` :
 ```python
-MIN_USER_INTERACTIONS: int = 10  # Exemple: seuil plus conservateur
+MIN_UNIQUE_ARTICLES_READ: int = 10  # Exemple: seuil plus conservateur
 ```
 
 Puis relancez les tests.

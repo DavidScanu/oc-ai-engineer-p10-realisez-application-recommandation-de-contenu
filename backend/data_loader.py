@@ -244,7 +244,8 @@ class DataLoader:
                 "first_interaction": history['click_datetime'].min().isoformat() if len(history) > 0 else None,
                 "last_interaction": history['click_datetime'].max().isoformat() if len(history) > 0 else None
             },
-            "top_categories": categories
+            "top_categories": categories,
+            "is_new_user": False
         }
     
     def get_data_stats(self) -> Dict:

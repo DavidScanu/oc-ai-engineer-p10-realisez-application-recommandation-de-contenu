@@ -37,11 +37,6 @@ class HybridRecommender(BaseRecommender):
             )
             # Fallback direct vers popularité
             recommendations = self.popularity_rec.recommend(user_id, n_recommendations, **kwargs)
-            # Marquer le fallback dans les métadonnées
-            if recommendations and isinstance(recommendations, list):
-                for rec in recommendations:
-                    rec['fallback_from'] = 'hybrid'
-                    rec['fallback_reason'] = 'insufficient_valid_history'
             return recommendations
 
         # Collecter les recommandations de chaque approche

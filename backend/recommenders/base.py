@@ -48,7 +48,7 @@ class BaseRecommender(ABC):
         """Détermine si un utilisateur est nouveau (peu d'interactions)"""
         from config import settings
         user_history = self.data_loader.get_user_history(user_id)
-        return len(user_history) < settings.MIN_USER_INTERACTIONS
+        return len(user_history) < settings.MIN_UNIQUE_ARTICLES_READ
     
     def _get_available_articles(self, user_id: int, exclude_seen: bool = True) -> pd.DataFrame:
         """Récupère les articles disponibles pour recommandation"""
@@ -92,7 +92,7 @@ class BaseRecommender(ABC):
         Vérifie si l'utilisateur a suffisamment d'historique VALIDE.
 
         Combine :
-        - Quantité : >= MIN_USER_INTERACTIONS
+        - Quantité : >= MIN_UNIQUE_ARTICLES_READ (articles uniques lus)
         - Qualité : click_article_id valides uniquement
 
         Returns:
@@ -101,13 +101,13 @@ class BaseRecommender(ABC):
         from config import settings
 
         valid_articles = self._get_valid_user_article_ids(user_id)
-        has_enough = len(valid_articles) >= settings.MIN_USER_INTERACTIONS
+        has_enough = len(valid_articles) >= settings.MIN_UNIQUE_ARTICLES_READ
 
         if not has_enough:
             logger.info(
                 f"User {user_id}: insufficient valid history "
-                f"({len(valid_articles)} valid articles, "
-                f"minimum: {settings.MIN_USER_INTERACTIONS})"
+                f"({len(valid_articles)} unique articles read, "
+                f"minimum: {settings.MIN_UNIQUE_ARTICLES_READ})"
             )
 
         return has_enough

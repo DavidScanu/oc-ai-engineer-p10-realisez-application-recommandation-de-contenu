@@ -29,11 +29,6 @@ class ContentRecommender(BaseRecommender):
             from .popularity import PopularityRecommender
             fallback = PopularityRecommender(self.data_loader)
             recommendations = fallback.recommend(user_id, n_recommendations, **kwargs)
-            # Marquer le fallback dans les métadonnées
-            if recommendations and isinstance(recommendations, list):
-                for rec in recommendations:
-                    rec['fallback_from'] = 'content'
-                    rec['fallback_reason'] = 'insufficient_valid_history'
             return recommendations
         
         # Charger les embeddings et métadonnées
