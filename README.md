@@ -331,10 +331,34 @@ Ce script teste :
 curl http://localhost:8000/health
 
 # Recommandations hybrides pour un utilisateur
-curl -X POST "http://localhost:8000/recommend/12345?method=hybrid&n_recommendations=5"
+curl -X POST "http://localhost:8000/recommend/5890?method=hybrid&n_recommendations=5"
+
+# Recommandations par similarité de contenu
+curl -X POST "http://localhost:8000/recommend/5890?method=content&n_recommendations=5&exclude_seen=true"
+
+# Recommandations par popularité
+curl -X POST "http://localhost:8000/recommend/5890?method=popularity&n_recommendations=5"
+
+# Recommandations par clustering
+curl -X POST "http://localhost:8000/recommend/5890?method=clustering&n_recommendations=5"
+
+# Informations sur le segment/cluster d'un utilisateur
+curl http://localhost:8000/users/5890/segment
+
+# Caractéristiques de tous les segments/clusters d'utilisateurs
+curl http://localhost:8000/clusters
 
 # Liste des utilisateurs
 curl http://localhost:8000/users?limit=10
+
+# Statistiques d'un utilisateur
+curl http://localhost:8000/users/5890/stats
+
+# Articles populaires
+curl http://localhost:8000/popular?limit=5
+
+# Statistiques détaillées des données (debug)
+curl http://localhost:8000/debug/data-stats
 ```
 
 ### Interface de documentation interactive
