@@ -5,6 +5,7 @@ from typing import List, Optional
 import uvicorn
 
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from models import (
@@ -424,13 +425,20 @@ async def get_detailed_data_stats():
 # GESTION DES ERREURS
 # =======================
 
+
 @app.exception_handler(404)
 async def not_found_handler(request, exc):
-    return {"error": "Ressource non trouvée", "detail": str(exc.detail)}
+    return JSONResponse(
+        status_code=404,
+        content={"error": "Ressource non trouvée", "detail": str(getattr(exc, 'detail', exc))}
+    )
 
 @app.exception_handler(500)
 async def internal_error_handler(request, exc):
-    return {"error": "Erreur interne du serveur", "detail": str(exc.detail)}
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Erreur interne du serveur", "detail": str(exc)}
+    )
 
 # =======================
 # POINT D'ENTRÉE
