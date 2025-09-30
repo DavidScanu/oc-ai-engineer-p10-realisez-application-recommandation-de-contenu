@@ -154,6 +154,7 @@ L'application implémente **4 méthodes de recommandation** complémentaires :
 - **Support CORS** pour l'intégration frontend
 - **Endpoints de debug** pour le monitoring et les tests
 
+
 ## Lancement du backend de l'application
 
 ### Prérequis
@@ -161,6 +162,14 @@ L'application implémente **4 méthodes de recommandation** complémentaires :
 - Python 3.8+
 - Environnement virtuel (recommandé)
 - Données dans le dossier `backend/data/`
+
+### Récupération des fichiers volumineux (Git LFS)
+
+Si vous venez de cloner le dépôt, exécutez la commande suivante depuis la racine du dépôt pour télécharger les fichiers volumineux nécessaires (embeddings, clusters, etc.) :
+
+```bash
+git lfs pull
+```
 
 ### Installation des dépendances
 
