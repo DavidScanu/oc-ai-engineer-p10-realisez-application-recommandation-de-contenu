@@ -121,8 +121,6 @@ L'application implémente **4 méthodes de recommandation** complémentaires :
 - **👥 Clustering d'utilisateurs** : Segmente les utilisateurs en 5 groupes et recommande les articles populaires dans chaque segment
 - **🎭 Hybride** : Combine intelligemment les 3 approches précédentes avec pondération (40% clustering, 30% contenu, 20% popularité, 10% diversité)
 
-
-
 #### Calcul de popularité normalisée
 
 Le système utilise une approche innovante pour calculer la popularité en **normalisant par l'âge de l'article** :
@@ -146,6 +144,25 @@ Article B (1 mois)  : 150 clics → score = 150/1 = 150 clics/mois
 
 **Protection** : Un âge minimum de 0.5 mois est appliqué pour éviter des scores artificiellement élevés sur des articles publiés il y a quelques jours.
 
+#### Similarité de contenu avec embeddings
+
+- **Embeddings pré-calculés** : Vecteurs de 250 dimensions pour chaque article
+- **Mesure de similarité** : Cosine similarity pour trouver les articles les plus proches
+- **Recommandations personnalisées** : Basées sur l'historique de lecture de l'utilisateur
+- **Filtrage qualité** : Exclusion des articles trop courts (< 50 mots) ou trop anciens (> 2 ans)
+
+#### Clustering d'utilisateurs
+
+- **Segmentation** : Les utilisateurs sont regroupés en 5 clusters basés sur leurs comportements de lecture
+- **Recommandations par cluster** : Les articles populaires dans chaque cluster sont recommandés aux utilisateurs
+- **Adaptabilité** : Permet de recommander des articles même pour les utilisateurs avec peu d'historique
+
+#### Approche hybride
+
+- **Combinaison pondérée** des scores des 3 méthodes précédentes
+- **Pondérations** : 40% clustering, 30% contenu, 20% popularité, 10% diversité
+- **Bonus diversité** : Encourage la variété dans les recommandations pour éviter la monotonie
+
 ### Gestion adaptative des données
 
 - **Détection automatique** de la date de référence (dernier clic enregistré: 2017-11-13 pour ce dataset)
@@ -153,7 +170,7 @@ Article B (1 mois)  : 150 clics → score = 150/1 = 150 clics/mois
 - **Optimisation temporelle** : Simulation de recommandations en temps réel basée sur les données historiques
 - **Cache intelligent** : Mise en cache des calculs coûteux (clusters, popularité)
 
-### Dates de référence et cohérence temporelle
+#### Dates de référence et cohérence temporelle
 
 Le système utilise deux dates de référence distinctes provenant de sources différentes :
 
