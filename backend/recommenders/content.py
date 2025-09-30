@@ -27,7 +27,12 @@ class ContentRecommender(BaseRecommender):
             # Fallback sur popularité pour nouveaux utilisateurs
             from .popularity import PopularityRecommender
             fallback = PopularityRecommender(self.data_loader)
-            return fallback.recommend(user_id, n_recommendations, **kwargs)
+            recommendations = fallback.recommend(user_id, n_recommendations, **kwargs)
+            # Marquer le fallback dans les métadonnées
+            if recommendations and isinstance(recommendations, list):
+                for rec in recommendations:
+                    rec['fallback_from'] = 'content'
+            return recommendations
         
         # Charger les embeddings et métadonnées
         embeddings = self.data_loader.load_articles_embeddings()

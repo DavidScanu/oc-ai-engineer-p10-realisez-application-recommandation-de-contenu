@@ -163,6 +163,66 @@ Article B (1 mois)  : 150 clics → score = 150/1 = 150 clics/mois
 - **Pondérations** : 40% clustering, 30% contenu, 20% popularité, 10% diversité
 - **Bonus diversité** : Encourage la variété dans les recommandations pour éviter la monotonie
 
+### Gestion du cold start (utilisateurs nouveaux/inconnus)
+
+Le système gère automatiquement le problème du **cold start** pour les utilisateurs sans historique :
+
+**Comportement par méthode** :
+
+| Méthode | Comportement pour utilisateur inexistant |
+|---------|------------------------------------------|
+| **Popularité** | ✅ Fonctionne directement (ne dépend pas de l'utilisateur) |
+| **Similarité de contenu** | ✅ Fallback automatique sur Popularité |
+| **Clustering** | ✅ Fallback automatique sur Popularité |
+| **Hybride** | ✅ Utilise Popularité via les fallbacks des autres méthodes |
+
+**Avantages** :
+- ✅ **Aucune erreur** pour un utilisateur inexistant
+- ✅ **Recommandations cohérentes** basées sur les tendances actuelles
+- ✅ **Expérience utilisateur continue** même sans historique
+- ✅ **Logs explicites** pour faciliter le débogage (ex: "User {id} inconnu, fallback sur popularité (cold start)")
+
+**Exemple** : Si vous demandez des recommandations pour l'utilisateur ID 999999 qui n'existe pas, le système retournera automatiquement les articles les plus populaires (normalisés par âge) sans lever d'erreur.
+
+#### Transparence du fallback dans les réponses API
+
+Lorsqu'un fallback est appliqué, l'API indique clairement cette information dans les métadonnées de la réponse :
+
+```json
+{
+  "user_id": 999999,
+  "method": "content",
+  "recommendations": [...],
+  "metadata": {
+    "method": "content",
+    "actual_method": "popularity",
+    "fallback_applied": true,
+    "fallback_reason": "Cold start: utilisateur sans historique, fallback de 'content' vers 'popularity'",
+    "user_stats": {
+      "user_id": 999999,
+      "total_interactions": 0,
+      "unique_articles": 0,
+      "date_range": {
+        "first_interaction": null,
+        "last_interaction": null
+      },
+      "top_categories": [],
+      "is_new_user": true
+    }
+  }
+}
+```
+
+**Champs ajoutés dans les métadonnées** :
+- `actual_method` : La méthode réellement utilisée après fallback
+- `fallback_applied` : Boolean indiquant si un fallback a été effectué
+- `fallback_reason` : Explication détaillée du pourquoi du fallback
+
+Cela permet aux applications clientes de :
+- ✅ Détecter automatiquement les cas de cold start
+- ✅ Afficher un message adapté à l'utilisateur (ex: "Nouveaux utilisateurs : voici les articles tendances")
+- ✅ Logger et monitorer les taux de fallback pour améliorer le système
+
 ### Gestion adaptative des données
 
 - **Détection automatique** de la date de référence (dernier clic enregistré: 2017-11-13 pour ce dataset)
@@ -190,7 +250,7 @@ Le système utilise deux dates de référence distinctes provenant de sources di
 
 ### API REST complète
 
-- **Documentation interactive** automatique avec FastAPI
+- **Documentation interactive** automatique avec FastAPI (Swagger UI disonible à `/docs`)
 - **Gestion d'erreurs** robuste avec codes HTTP appropriés
 - **Validation automatique** des paramètres avec Pydantic
 - **Support CORS** pour l'intégration frontend

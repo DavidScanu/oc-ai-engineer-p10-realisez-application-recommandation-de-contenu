@@ -217,11 +217,25 @@ class ClusteringRecommender(BaseRecommender):
     def recommend(self, user_id: int, n_recommendations: int = 5, **kwargs) -> List[Dict[str, Any]]:
         """Recommande des articles populaires dans le cluster de l'utilisateur"""
         logger.info(f"👥 Recommandation par clustering pour user {user_id}")
-        
+
+        # Vérifier si l'utilisateur existe
+        user_history = self.data_loader.get_user_history(user_id)
+        if len(user_history) == 0:
+            logger.warning(f"⚠️ User {user_id} inconnu, fallback sur popularité (cold start)")
+            # Fallback sur popularité pour nouveaux utilisateurs (cold start)
+            from .popularity import PopularityRecommender
+            fallback = PopularityRecommender(self.data_loader)
+            recommendations = fallback.recommend(user_id, n_recommendations, **kwargs)
+            # Marquer le fallback dans les métadonnées
+            if recommendations and isinstance(recommendations, list):
+                for rec in recommendations:
+                    rec['fallback_from'] = 'clustering'
+            return recommendations
+
         # Récupérer le cluster de l'utilisateur
         user_cluster = self._get_user_cluster(user_id)
         logger.debug(f"👤 User {user_id} → Cluster {user_cluster}")
-        
+
         if self._user_clusters is None:
             logger.error("❌ Clusters non disponibles")
             return []

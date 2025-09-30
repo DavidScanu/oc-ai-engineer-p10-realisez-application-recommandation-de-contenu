@@ -126,15 +126,7 @@ async def recommend_for_user(
         raise HTTPException(status_code=400, detail="Minimum 1 recommandation")
     
     try:
-        # Vérifier que l'utilisateur existe
-        all_users = data_loader.get_all_users()
-        if user_id not in all_users:
-            raise HTTPException(
-                status_code=404, 
-                detail=f"Utilisateur {user_id} non trouvé"
-            )
-        
-        # Générer les recommandations
+        # Générer les recommandations (gestion du cold start automatique dans les recommenders)
         logger.info(f"🎯 Génération recommandations: user={user_id}, method={method}, n={n_recommendations}")
         
         recommender = get_recommender(method)
@@ -144,10 +136,20 @@ async def recommend_for_user(
             exclude_seen=exclude_seen
         )
         
+        # Détecter si un fallback a été appliqué
+        fallback_applied = False
+        actual_method = method
+        if recommendations and isinstance(recommendations, list) and len(recommendations) > 0:
+            if 'fallback_from' in recommendations[0]:
+                fallback_applied = True
+                actual_method = 'popularity'
+
         # Métadonnées sur la recommandation
         user_stats = data_loader.get_user_stats(user_id)
         metadata = {
             "method": method,
+            "actual_method": actual_method,
+            "fallback_applied": fallback_applied,
             "parameters": {
                 "n_recommendations": n_recommendations,
                 "exclude_seen": exclude_seen
@@ -155,7 +157,10 @@ async def recommend_for_user(
             "user_stats": user_stats,
             "results_count": len(recommendations)
         }
-        
+
+        if fallback_applied:
+            metadata["fallback_reason"] = f"Cold start: utilisateur sans historique, fallback de '{method}' vers 'popularity'"
+
         return RecommendationResponse(
             user_id=user_id,
             method=method,

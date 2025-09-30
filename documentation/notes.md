@@ -32,26 +32,14 @@
 
 # **TODO**
 
-## **Popularité** 
-
-* Période : 3 dernier mois  
-* Normaliser sur la période d'existence de l'article (pour enlever le filtre de récence, 3 mois)  
-  * ex : si l’article à 8 mois, on divise par le nombre de mois
-
-## **Nouveauté**
-
-* Ajouter un paramètre de nouveauté 
-
-## **Nouvel utilisateur** 
-
-* Quand on entre un ID utilisateur qui n’existe pas   
-* Quelle méthode de recommandation :   
-  * Popularité
+- ✅ **Normaliser** sur la période d'existence de l'article (pour enlever le filtre de récence, 3 mois). Ex : si l’article à 8 mois, on divise par le nombre de mois.
+- Ajouter un paramètre de nouveauté
+- ✅ **Nouvel utilisateur** : Quand on entre un ID utilisateur qui n’existe pas, quelle méthode de recommandation ? Popularité.
 
 ## **Nouveaux articles** 
 
-* Ajouter à la base de donnée   
-  * table : articles  
-  * table : clicks  
-* Créer l’embedding  
+* Ajouter à la base de donnée
+  * table : articles
+  * table : clicks
+* Créer l’embedding
 * Il rentre automatiquement dans le contenu recommandé

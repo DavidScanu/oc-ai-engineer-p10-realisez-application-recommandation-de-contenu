@@ -209,9 +209,19 @@ class DataLoader:
     def get_user_stats(self, user_id: int) -> Dict:
         """Statistiques d'un utilisateur"""
         history = self.get_user_history(user_id)
-        
+
         if len(history) == 0:
-            return {"error": "User not found", "interactions": 0}
+            return {
+                "user_id": user_id,
+                "total_interactions": 0,
+                "unique_articles": 0,
+                "date_range": {
+                    "first_interaction": None,
+                    "last_interaction": None
+                },
+                "top_categories": [],
+                "is_new_user": True
+            }
         
         # Catégories les plus consultées
         categories = []
