@@ -1,15 +1,11 @@
 # Projet 10 : Réalisez une application de recommandation de contenu
 
-## 📊 Badges
-
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-14%2B-black?logo=next.js&logoColor=white)](https://nextjs.org/)
-[![Uvicorn](https://img.shields.io/badge/Uvicorn-0.11%2B-4E4E4E?logo=uvicorn&logoColor=white)](https://www.uvicorn.org/)
 [![Azure](https://img.shields.io/badge/Azure-Functions-0078D4?logo=microsoft-azure&logoColor=white)](https://azure.microsoft.com/)
 [![Dataset](https://img.shields.io/badge/Dataset-Globo.com-red)](https://www.kaggle.com/gspmoreira/news-portal-user-interactions-by-globocom)
-
 
 > 🎓 OpenClassrooms • Parcours [AI Engineer](https://openclassrooms.com/fr/paths/795-ai-engineer) | 👋 *Étudiant* : [David Scanu](https://www.linkedin.com/in/davidscanu14/)
 
