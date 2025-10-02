@@ -177,11 +177,65 @@ class DataLoader:
         # Score normalisé par l'âge de l'article (clics par mois d'existence)
         popularity['popularity_score'] = popularity['raw_score'] / popularity['article_age_months']
 
+        # Solution 1: Boost temporaire de nouveauté (cold start pour nouveaux articles)
+        # Appliquer un bonus pour les articles très récents
+        popularity['article_age_hours'] = popularity['article_age_days'] * 24
+
+        def apply_novelty_boost(row):
+            """Applique un boost de nouveauté basé sur l'âge de l'article"""
+            age_hours = row['article_age_hours']
+            base_score = row['popularity_score']
+
+            if age_hours < 24:  # Moins de 24h
+                return base_score * settings.NOVELTY_BOOST_24H
+            elif age_hours < 72:  # 1-3 jours
+                return base_score * settings.NOVELTY_BOOST_72H
+            else:  # Plus de 3 jours
+                return base_score
+
+        popularity['popularity_score'] = popularity.apply(apply_novelty_boost, axis=1)
+
         result = popularity.sort_values('popularity_score', ascending=False)
-        logger.info(f"📈 Articles populaires calculés: {len(result):,} articles (normalisés par âge)")
+        logger.info(f"📈 Articles populaires calculés: {len(result):,} articles (normalisés par âge + boost nouveauté)")
 
         return result
     
+    def get_recent_articles(self, hours: int = None, category_id: int = None, limit: int = 10) -> pd.DataFrame:
+        """
+        Solution 2: Récupère les articles récents (cold start pour nouveaux articles)
+
+        Args:
+            hours: Fenêtre temporelle en heures (défaut: RECENT_ARTICLES_CUTOFF_HOURS)
+            category_id: Filtrer par catégorie (optionnel)
+            limit: Nombre maximum d'articles à retourner
+
+        Returns:
+            DataFrame avec les articles les plus récents
+        """
+        if hours is None:
+            hours = settings.RECENT_ARTICLES_CUTOFF_HOURS
+
+        metadata = self.load_articles_metadata()
+        reference_date = self._get_reference_date()
+        cutoff_date = reference_date - timedelta(hours=hours)
+
+        # Filtrer par date
+        recent = metadata[metadata['created_date'] >= cutoff_date].copy()
+
+        # Filtrer par catégorie si spécifié
+        if category_id is not None:
+            recent = recent[recent['category_id'] == category_id]
+
+        # Trier par date de création décroissante
+        recent = recent.sort_values('created_date', ascending=False)
+
+        # Limiter le nombre de résultats
+        recent = recent.head(limit)
+
+        logger.info(f"📰 Articles récents trouvés: {len(recent)} (fenêtre: {hours}h, catégorie: {category_id})")
+
+        return recent
+
     def get_all_users(self) -> List[int]:
         """Récupère la liste de tous les utilisateurs"""
         interactions = self.load_user_interactions()

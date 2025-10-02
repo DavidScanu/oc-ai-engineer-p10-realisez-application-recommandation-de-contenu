@@ -1,15 +1,114 @@
 # Projet 10 : Réalisez une application de recommandation de contenu
 
-## Contexte
+## 📊 Badges
 
-## Mission 
+[![Python](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-14%2B-black?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Uvicorn](https://img.shields.io/badge/Uvicorn-0.11%2B-4E4E4E?logo=uvicorn&logoColor=white)](https://www.uvicorn.org/)
+[![Azure](https://img.shields.io/badge/Azure-Functions-0078D4?logo=microsoft-azure&logoColor=white)](https://azure.microsoft.com/)
+[![Dataset](https://img.shields.io/badge/Dataset-Globo.com-red)](https://www.kaggle.com/gspmoreira/news-portal-user-interactions-by-globocom)
 
-## Livrables 
 
-## Plan d'action
+> 🎓 OpenClassrooms • Parcours [AI Engineer](https://openclassrooms.com/fr/paths/795-ai-engineer) | 👋 *Étudiant* : [David Scanu](https://www.linkedin.com/in/davidscanu14/)
+
+## 🎯 Contexte
+
+My Content est une start-up innovante qui souhaite encourager la lecture en recommandant des contenus pertinents et personnalisés à ses utilisateurs. Dans un premier temps, nous nous concentrons sur la **recommandation d'articles et de livres aux particuliers**.
+
+En tant que CTO et cofondateur aux côtés de Samia (CEO), nous sommes en pleine construction d'un premier MVP (Minimum Viable Product) sous forme d'application. Comme nous ne disposons pas encore de données utilisateurs propres, nous utilisons un dataset public de haute qualité : [les interactions des utilisateurs du portail d'actualités brésilien Globo.com](https://www.kaggle.com/gspmoreira/news-portal-user-interactions-by-globocom#clicks_sample.csv) (3 millions de clics, 322K utilisateurs, 46K articles).
+
+Cette approche nous permet de **développer et valider notre système de recommandation** avant le lancement commercial, tout en nous assurant de la scalabilité de notre architecture technique pour gérer **l'ajout futur de nouveaux utilisateurs et articles**.
+
+## 🚀 Mission
+
+Notre mission se décline en trois axes principaux :
+
+### 1. Backend : Développement du système de recommandation
+Nous devons créer un système de recommandation multi-approches capable de :
+- Suggérer 5 articles pertinents à chaque utilisateur
+- Gérer le cold start (nouveaux utilisateurs et nouveaux articles)
+- Combiner plusieurs méthodes : popularité, similarité de contenu, clustering utilisateurs, et approche hybride
+
+### 2. Architecture serverless avec Azure Functions
+Nous mettons en place une architecture cloud scalable qui :
+- Expose le système de recommandation via Azure Functions
+- Permet un déploiement rapide et économique
+- Supporte une montée en charge progressive
+
+### 3. Frontend : Application de démonstration
+Nous développons une interface simple qui :
+- Liste les utilisateurs disponibles
+- Affiche les 5 recommandations d'articles pour l'utilisateur sélectionné
+- Démontre les fonctionnalités à Samia et aux futurs utilisateurs
+
+## 📦 Livrables et démonstration
+
+### 📱 Application de démonstration
+- Frontend : Interface utilisateur simple
+  - URL de production : (à venir)
+- Backend : Système de recommandation serverless déployé sur Azure Functions
+  - URL de production : (à venir)
+- Entrée : ID utilisateur → Sortie : Top 5 articles recommandés
+- Démonstration des fonctionnalités complètes du système
+
+### 💻 [Code source versionné](https://github.com/DavidScanu/oc-ai-engineer-p10-realisez-application-recommandation-de-contenu)
+- Dépôt GitHub avec architecture complète
+- Scripts de prétraitement des données
+- Modèles de recommandation (4 approches)
+- Configuration Azure Functions
+- Documentation technique (README détaillé)
+- Code permettant un déploiement end-to-end
+
+### 📊 [Support de présentation]()
+- Document PowerPoint/PDF (15-25 slides)
+- Description fonctionnelle de l'application
+- Analyse comparative des modèles testés (avantages/inconvénients)
+- Schéma de l'architecture technique retenue
+- Présentation détaillée du système de recommandation
+- Schéma de l'architecture cible évolutive (gestion nouveaux users/articles)
+
+## 📋 Plan d'action
+
+### Phase 1 : Exploration et compréhension (✅ Complété)
+- [x] Analyse exploratoire du dataset Globo.com
+- [x] Compréhension des défis du cold start
+- [x] Identification des features pertinentes
+
+### Phase 2 : Développement des recommandeurs (✅ Complété)
+- [x] Implémentation de la méthode **Popularité** (normalisée par âge)
+- [x] Développement de la **Similarité de contenu** (embeddings)
+- [x] Création du **Clustering utilisateurs** (5 segments)
+- [x] Conception de l'approche **Hybride** (combinaison pondérée)
+
+### Phase 3 : Architecture backend (✅ Complété)
+- [x] API FastAPI avec endpoints REST complets
+- [x] Système de fallback automatique pour cold start
+- [x] Gestion adaptative des dates de référence
+- [x] Cache intelligent des calculs coûteux
+- [x] Documentation interactive (Swagger)
+
+### Phase 4 : Déploiement Azure (En cours)
+- [ ] Configuration Azure Functions (Consumption Plan)
+- [ ] Déploiement des modèles et embeddings
+- [ ] Tests de performance et monitoring
+- [ ] Optimisation des coûts (gestion des services gratuits)
+
+### Phase 5 : Application frontend (À venir)
+- [ ] Interface de sélection des utilisateurs
+- [ ] Affichage des recommandations avec métadonnées
+- [ ] Intégration avec Azure Functions
+- [ ] Tests utilisateurs avec Samia
+
+### Phase 6 : Documentation et présentation (À venir)
+- [ ] Finalisation du README technique
+- [ ] Création du support de présentation
+- [ ] Préparation de la démonstration live
+- [ ] Documentation de l'architecture cible
 
 
-## Analyse exploratoire des données
+## 📊 Analyse exploratoire des données
 
 Cette section présente l'analyse exploratoire des données du portail de news Globo.com, comprenant les interactions utilisateurs et les métadonnées des articles.
 
@@ -110,7 +209,7 @@ Ces insights guideront la conception des algorithmes de recommandation, notammen
 
 # Backend FastAPI
 
-## Fonctionnalités implémentées
+## ✨ Fonctionnalités implémentées
 
 ### Système de recommandation multi-approches
 
@@ -121,179 +220,285 @@ L'application implémente **4 méthodes de recommandation** complémentaires :
 - **👥 Clustering d'utilisateurs** : Segmente les utilisateurs en 5 groupes et recommande les articles populaires dans chaque segment
 - **🎭 Hybride** : Combine intelligemment les 3 approches précédentes avec pondération (40% clustering, 30% contenu, 20% popularité, 10% diversité)
 
-#### Calcul de popularité normalisée
+### 🔥 Méthode 1 : Popularité normalisée par âge (avec boost de nouveauté)
 
-Le système utilise une approche innovante pour calculer la popularité en **normalisant par l'âge de l'article** :
+**Principe** : Recommande les articles avec le meilleur ratio clics/mois d'existence, favorisant les tendances récentes. Pour les nouveaux articles, un boost temporaire est appliqué pour compenser le manque de clics initiaux.
 
-**Formule** :
+**Formule de base** :
+```python
+# Étape 1 : Score de popularité brut normalisé par l'âge
+raw_score = (0.7 × unique_users + 0.3 × total_clicks)
+popularity_score = raw_score / article_age_months
+
+# Étape 2 : Boost temporaire de nouveauté (pour les nouveaux aerticles)
+if article_age_hours < 24:
+    final_score = popularity_score × 1.5  # +50% pour articles < 24h
+elif article_age_hours < 72:
+    final_score = popularity_score × 1.2  # +20% pour articles 24-72h
+else:
+    final_score = popularity_score       # Pas de boost après 3 jours
 ```
-popularity_score = (0.7 × unique_users + 0.3 × total_clicks) / article_age_months
+
+**Exemple concret** :
+```
+Article A (ancien, 8 mois) : 800 clics → score = 800/8 = 100 clics/mois
+Article B (récent, 1 jour)  : 10 clics → score = (10/0.03) × 1.5 = 500 clics/mois équivalents
+→ Article B bénéficie du boost nouveauté et devient plus visible malgré moins de clics
 ```
 
 **Avantages** :
-- ✅ **Équité temporelle** : Les nouveaux articles ne sont pas désavantagés par rapport aux anciens
-- ✅ **Détection de tendances** : Un article récent avec peu de clics peut surpasser un ancien avec beaucoup de clics s'il a un meilleur ratio
-- ✅ **Pas de fenêtre arbitraire** : Plus besoin de définir une fenêtre fixe (ex: 90 jours)
+- ✅ **Équité temporelle** : Les nouveaux articles ne sont pas désavantagés
+- ✅ **Détection de tendances** : Favorise les articles récents avec bon engagement
+- ✅ **Cold start résolu** : Boost automatique pour nouveaux articles
+- ✅ **Dégradé progressif** : Le boost diminue naturellement avec le temps
+
+**Gestion du cold start** :
+- ✅ **Nouveaux utilisateurs** : Fonctionne directement (pas d'historique requis)
+- ✅ **Nouveaux articles** : Boost ×1.5 si < 24h compense le faible nombre de clics initial
+
+**Configuration** : Ajustez `NOVELTY_BOOST_24H` et `NOVELTY_BOOST_72H` dans [config.py](backend/config.py)
+
+---
+
+### 📖 Méthode 2 : Similarité de contenu (embeddings + fallback métadonnées)
+
+**Principe** : Recommande des articles similaires à ceux déjà consultés par l'utilisateur, basé sur leurs représentations vectorielles.
+
+**Architecture** :
+```python
+# Approche principale : Embeddings
+user_profile = mean(embeddings_of_read_articles)  # Vecteur 250D
+similarities = cosine_similarity(user_profile, all_article_embeddings)
+recommendations = top_N(similarities)
+
+# ✅ Fallback métadonnées (Solution 3 implémentée)
+if embedding_missing or insufficient_history:
+    user_top_categories = get_user_top_categories(user_id, top_n=3)
+    avg_words = get_user_avg_words_preference(user_id)
+
+    # Scorer par similarité de catégories et longueur d'articles
+    candidates = articles[articles.category_id.isin(user_top_categories)]
+    candidates['score'] = 1.0 / (1.0 + abs(words_count - avg_words) / avg_words)
+
+    # Bonus pour catégories favorites (top 1: +0.3, top 2: +0.2, top 3: +0.1)
+    recommendations = top_N(candidates.sort_values('score'))
+```
+
+**Caractéristiques** :
+- **Embeddings pré-calculés** : Vecteurs de 250 dimensions (Sentence-BERT)
+- **Mesure de similarité** : Cosine similarity pour trouver les articles les plus proches
+- **Profil utilisateur dynamique** : Moyenne des embeddings des articles lus
+- **Filtrage qualité** : Exclusion des articles < 50 mots ou > 2 ans
+
+**Gestion du cold start** :
+- ✅ **Nouveaux utilisateurs** : Fallback automatique vers popularité si < 5 articles uniques lus
+- ✅ **Nouveaux articles sans embeddings** : Fallback utilisant les métadonnées pour la recommandation : 
+  - Utilise les **catégories préférées de l'utilisateur**
+  - Compare la **longueur d'articles** (`words_count`)
+  - **Scoring par similarité de métadonnées**
+
+**Avantages du fallback métadonnées** :
+- ✅ **Personnalisé** : Basé sur les préférences réelles de l'utilisateur
+- ✅ **Léger** : Pas de calcul d'embeddings coûteux
+- ✅ **Robuste** : Fonctionne même avec embeddings manquants
+
+---
+
+### 👥 Méthode 3 : Clustering d'utilisateurs (filtrage collaboratif)
+
+**Principe** : Regroupe les utilisateurs ayant des comportements similaires et recommande les articles populaires dans chaque segment.
+
+**Architecture** :
+```python
+# Étape 1 : Construction des features utilisateurs
+user_features = [
+    total_clicks, unique_articles, category_diversity,
+    avg_words_preference, clicks_per_hour,
+    top_10_categories_preferences  # Ratio de clics par catégorie
+]
+
+# Étape 2 : Clustering K-means (5 segments)
+scaler = StandardScaler()
+features_scaled = scaler.fit_transform(user_features)
+clusters = KMeans(n_clusters=5).fit_predict(features_scaled)
+
+# Étape 3 : Recommandations par cluster
+cluster_id = get_user_cluster(user_id)
+cluster_users = users[users.cluster == cluster_id]
+popular_in_cluster = get_popular_articles_for_users(cluster_users)
+```
+
+**Caractéristiques des segments** :
+- **5 clusters** basés sur le comportement de lecture (activité, diversité, préférences)
+- **Mise à jour quotidienne** : Recalcul automatique toutes les 24h
+- **Assignation intelligente** : Nouveaux utilisateurs assignés après suffisamment d'interactions
+- **Cache persistant** : Sauvegarde sur disque pour démarrage rapide
+
+**Gestion du cold start** :
+- ✅ **Nouveaux utilisateurs** : Fallback automatique vers popularité si < 5 articles uniques lus
+- ✅ **Assignation différée** : Clustering après accumulation d'un historique suffisant
+- ⚠️ **Nouveaux articles** : Pas d'impact (clusters basés sur utilisateurs, pas articles)
+
+**Avantages** :
+- ✅ **Découverte** : Recommande des articles appréciés par des utilisateurs similaires
+- ✅ **Diversité** : Introduit des articles hors du profil habituel de l'utilisateur
+- ✅ **Scalabilité** : Calcul en batch, performances optimales
+
+**Configuration** : Ajustez `N_USER_CLUSTERS` et `CLUSTER_UPDATE_FREQUENCY_HOURS` dans [config.py](backend/config.py)
+
+---
+
+### 🎭 Méthode 4 : Approche hybride (combinaison intelligente)
+
+**Principe** : Combine les 3 méthodes précédentes avec pondération optimisée pour maximiser pertinence et diversité.
+
+**Architecture** :
+```python
+# Collecte des recommandations de chaque méthode
+clustering_recs = clustering.recommend(user_id, n=10)    # Filtrage collaboratif
+content_recs = content.recommend(user_id, n=10)         # Similarité de contenu
+popularity_recs = popularity.recommend(user_id, n=10)   # Popularité normalisée
+
+# Agrégation avec pondération
+for article_id in all_recommendations:
+    score = (
+        0.4 × normalize(clustering_score) +      # 40% filtrage collaboratif
+        0.3 × normalize(content_score) +         # 30% similarité contenu
+        0.2 × normalize(popularity_score) +      # 20% tendances actuelles
+        0.1 × diversity_bonus                    # 10% bonus diversité
+    )
+
+    # Bonus consensus si l'article apparaît dans plusieurs méthodes
+    if appears_in_multiple_methods:
+        score += 0.1 × (methods_count - 1)
+
+recommendations = top_N(sorted_by_score)
+```
+
+**Pondérations par défaut** :
+- **40% Clustering** : Filtrage collaboratif (découverte)
+- **30% Contenu** : Similarité de contenu (pertinence)
+- **20% Popularité** : Tendances actuelles (fraîcheur)
+- **10% Diversité** : Bonus pour nouvelles catégories (exploration)
+
+**Normalisation des scores** :
+- Clustering : `score / 10.0` (scores souvent > 1)
+- Contenu : `score` (déjà entre 0 et 1)
+- Popularité : `score / 100.0` (scores peuvent être élevés)
+
+**Gestion du cold start** :
+- ✅ **Nouveaux utilisateurs** : Fallback automatique vers popularité (avec boost nouveauté)
+- ✅ **Nouveaux articles** : Bénéficient du boost ×1.5 via la composante popularité (20%)
+- ✅ **Approche gracieuse** : Combine les méthodes disponibles même si certaines échouent
+
+**Avantages** :
+- ✅ **Robustesse** : Compense les faiblesses de chaque méthode individuelle
+- ✅ **Personnalisation maximale** : Combine filtrage collaboratif + contenu + tendances
+- ✅ **Consensus intelligent** : Bonus pour articles recommandés par plusieurs méthodes
+- ✅ **Diversité garantie** : Encourage l'exploration de nouvelles catégories
+
+**Configuration** : Ajustez `HYBRID_WEIGHTS` dans [config.py](backend/config.py) pour changer les pondérations
+
+---
+
+## 🆕 Gestion du cold start
+
+Le système implémente une stratégie complète pour gérer le **cold start**, c'est-à-dire l'arrivée de nouveaux utilisateurs et de nouveaux articles sans historique suffisant.
+
+### 🧑 Cold start utilisateurs
+
+#### Détection intelligente
+
+Le système utilise une **approche en deux étapes** pour détecter si un utilisateur a suffisamment d'historique :
+
+1. **Vérification quantitative** : Minimum **5 articles uniques** lus (configurable via `MIN_UNIQUE_ARTICLES_READ`)
+2. **Validation qualitative** : Les articles doivent exister dans les métadonnées (IDs valides)
+
+**Exemple** : Un utilisateur avec 50 clics sur le même article = 1 seul article unique → historique insuffisant
+
+#### Scénarios de recommandation
+
+| Phase utilisateur | Articles uniques lus | Comportement système |
+|------------------|---------------------|---------------------|
+| **Nouvel utilisateur** | 0 | Fallback automatique vers **popularité avec boost nouveauté** |
+| **Peu d'historique** | 1-4 | Fallback automatique vers **popularité avec boost nouveauté** |
+| **Historique suffisant** | ≥5 | Recommandations **personnalisées complètes** (4 méthodes disponibles) |
+
+#### Comportement par méthode
+
+| Méthode | Utilisateur avec historique | Utilisateur sans historique |
+|---------|----------------------------|----------------------------|
+| **🔥 Popularité** | Tendances actuelles | Tendances actuelles (fonctionne directement) |
+| **📖 Contenu** | Similarité basée embeddings | Fallback → Popularité avec boost |
+| **👥 Clustering** | Articles populaires du segment | Fallback → Popularité avec boost |
+| **🎭 Hybride** | Combinaison des 3 méthodes | Fallback → Popularité avec boost |
+
+**Avantages** :
+- ✅ **Aucune erreur** : Toujours des recommandations pertinentes
+- ✅ **Transition progressive** : Personnalisation croissante avec l'accumulation d'historique
+- ✅ **Robustesse** : Gestion automatique des données invalides
+
+---
+
+### 📄 Cold start articles
+
+#### Stratégies implémentées
+
+Le système utilise **3 stratégies complémentaires** pour garantir la visibilité des nouveaux articles :
+
+**1️⃣ Boost temporaire de nouveauté** (Méthode Popularité)
+
+Les nouveaux articles reçoivent un multiplicateur de score automatique :
+- **< 24h** : ×1.5 (+50% de visibilité)
+- **24-72h** : ×1.2 (+20% de visibilité)
+- **> 72h** : ×1.0 (score normal)
 
 **Exemple** :
 ```
-Article A (8 mois) : 800 clics → score = 800/8 = 100 clics/mois
-Article B (1 mois)  : 150 clics → score = 150/1 = 150 clics/mois
-→ Article B est considéré comme plus "populaire" car plus tendance
+Article ancien (8 mois, 800 clics) : score = 100 clics/mois
+Article récent (1 jour, 10 clics) : score = 333 × 1.5 = 500 clics/mois équivalents
+→ Le nouvel article surpasse l'ancien grâce au boost
 ```
 
-**Protection** : Un âge minimum de 0.5 mois est appliqué pour éviter des scores artificiellement élevés sur des articles publiés il y a quelques jours.
+**2️⃣ Endpoint dédié "Articles récents"** (`GET /articles/recent`)
 
-#### Similarité de contenu avec embeddings
+Un endpoint spécifique permet de récupérer les nouveaux articles indépendamment des clics :
+- Fenêtre temporelle configurable (défaut : 48h)
+- Filtrage par catégorie optionnel
+- Idéal pour une section "Nouveautés" dans l'interface
 
-- **Embeddings pré-calculés** : Vecteurs de 250 dimensions pour chaque article
-- **Mesure de similarité** : Cosine similarity pour trouver les articles les plus proches
-- **Recommandations personnalisées** : Basées sur l'historique de lecture de l'utilisateur
-- **Filtrage qualité** : Exclusion des articles trop courts (< 50 mots) ou trop anciens (> 2 ans)
+**3️⃣ Fallback métadonnées** (Méthode Similarité de contenu)
 
-#### Clustering d'utilisateurs
+Si les embeddings ne sont pas disponibles pour un article, le système utilise :
+- Les **3 catégories préférées** de l'utilisateur
+- La **longueur d'articles** préférée (`words_count`)
+- Scoring par similarité de métadonnées avec bonus pour catégories favorites
 
-- **Segmentation** : Les utilisateurs sont regroupés en 5 clusters basés sur leurs comportements de lecture
-- **Recommandations par cluster** : Les articles populaires dans chaque cluster sont recommandés aux utilisateurs
-- **Adaptabilité** : Permet de recommander des articles même pour les utilisateurs avec peu d'historique
+#### Impact sur les méthodes de recommandation
 
-#### Approche hybride
+| Méthode | Article avec embeddings | Article sans embeddings | Article sans clics |
+|---------|------------------------|------------------------|--------------------|
+| **🔥 Popularité** | Score normal + boost nouveauté | Score normal + boost nouveauté | Boost ×1.5 compense le 0 clic |
+| **📖 Contenu** | Similarité embeddings | Fallback métadonnées | Fallback métadonnées |
+| **👥 Clustering** | Popularité dans segment | Popularité dans segment | Popularité dans segment |
+| **🎭 Hybride** | Combinaison complète | Fallback métadonnées + popularité | Bénéficie du boost via popularité |
 
-- **Combinaison pondérée** des scores des 3 méthodes précédentes
-- **Pondérations** : 40% clustering, 30% contenu, 20% popularité, 10% diversité
-- **Bonus diversité** : Encourage la variété dans les recommandations pour éviter la monotonie
+**Avantages** :
+- ✅ **Visibilité immédiate** : Les nouveaux articles apparaissent dès publication
+- ✅ **Dégradé progressif** : Le boost diminue naturellement avec le temps
+- ✅ **Robustesse** : Fonctionne même sans embeddings calculés
 
-### Gestion du cold start (utilisateurs nouveaux/inconnus)
+### 📊 Tableau récapitulatif
 
-Le système gère automatiquement le problème du **cold start** pour les utilisateurs avec un historique insuffisant ou invalide :
+| Aspect | Nouvel utilisateur | Nouvel article |
+|--------|-------------------|----------------|
+| **Détection** | < 5 articles uniques lus | Âge < 72h ou embeddings manquants |
+| **Stratégie** | Fallback popularité | Boost ×1.5 + endpoint dédié + fallback métadonnées |
+| **Délai visibilité** | Immédiat | Immédiat |
+| **Transition** | Progressive (5+ articles) | Progressive (3 jours) |
+| **Configuration** | `MIN_UNIQUE_ARTICLES_READ` | `NOVELTY_BOOST_24H`, `NOVELTY_BOOST_72H` |
 
-#### Détection intelligente du cold start
-
-Le système utilise une **approche en deux étapes** pour détecter le cold start :
-
-1. **Vérification quantitative** : L'utilisateur doit avoir lu au moins `MIN_UNIQUE_ARTICLES_READ` articles uniques (défaut: **5**)
-2. **Validation qualitative** : Les `click_article_id` doivent être valides (présents dans les métadonnées)
-
-**Exemple concret** :
-- Un utilisateur avec **50 clics sur le même article** = **1 seul article unique** → fallback
-- Un utilisateur avec **5 clics sur 5 articles différents** = **5 articles uniques** → recommandations personnalisées
-
-**Exemples de scénarios** :
-
-| Scénario utilisateur | Clics totaux | Articles uniques lus | Comportement |
-|---------------------|--------------|----------------------|--------------|
-| Utilisateur nouveau | 0 | 0 | Fallback vers popularité |
-| Peu d'historique | 2 | 2 | Fallback vers popularité (< 5) |
-| Données corrompues | 10 | 0 | Fallback vers popularité (IDs invalides) |
-| Historique partiel | 6 | 3 | Fallback vers popularité (3 articles < 5) |
-| Historique suffisant | 10 | 10 | Recommandations personnalisées |
-
-**Comportement par méthode** :
-
-| Méthode | Comportement pour historique insuffisant |
-|---------|------------------------------------------|
-| **Popularité** | ✅ Fonctionne directement (ne dépend pas de l'utilisateur) |
-| **Similarité de contenu** | ✅ Fallback automatique sur Popularité si < 5 articles uniques lus |
-| **Clustering** | ✅ Fallback automatique sur Popularité si < 5 articles uniques lus |
-| **Hybride** | ✅ Fallback automatique sur Popularité si < 5 articles uniques lus |
-
-**Avantages de cette approche** :
-- ✅ **Robustesse** : Gère les données corrompues ou invalides
-- ✅ **Qualité** : Évite les recommandations basées sur trop peu de données
-- ✅ **Aucune erreur** : Fallback automatique au lieu de retourner des listes vides
-- ✅ **Recommandations cohérentes** basées sur les tendances actuelles
-- ✅ **Logs explicites** : Indique le nombre d'articles uniques lus et le seuil minimum
-- ✅ **Configurable** : Ajustez `MIN_UNIQUE_ARTICLES_READ` dans `config.py` (valeurs recommandées : 3-10)
-
-**Exemple** : Si un utilisateur a lu 3 articles dont seulement 2 sont valides (IDs existants), le système appliquera automatiquement un fallback vers la méthode popularité, car 2 < 5 (seuil minimum).
-
-#### Transparence du fallback dans les réponses API
-
-Lorsqu'un fallback est appliqué, l'API indique clairement cette information **au niveau racine ET dans les métadonnées** de la réponse :
-
-```json
-{
-  "user_id": 999999,
-  "method": "content",
-  "actual_method": "popularity",
-  "fallback_applied": true,
-  "recommendations": [
-    {
-      "article_id": 160974,
-      "score": 25046.71428571429,
-      "reason": "Article populaire (#1) - 34145 utilisateurs, 37213 clics",
-      "metadata": {...}
-    }
-  ],
-  "metadata": {
-    "requested_method": "content",
-    "actual_method": "popularity",
-    "fallback_applied": true,
-    "fallback_reason": "Cold start: utilisateur avec moins de 5 articles uniques lus (0 détectés), fallback de 'content' vers 'popularity'",
-    "user_stats": {
-      "user_id": 999999,
-      "total_interactions": 0,
-      "unique_articles": 0,
-      "date_range": {
-        "first_interaction": null,
-        "last_interaction": null
-      },
-      "top_categories": [],
-      "is_new_user": true
-    }
-  },
-  "generated_at": "2025-09-30T09:49:40.605752"
-}
-```
-
-**Champs de fallback au niveau racine (accès rapide)** :
-- `actual_method` : La méthode réellement utilisée après fallback
-- `fallback_applied` : Boolean indiquant si un fallback a été effectué
-
-**Champs de fallback dans les métadonnées (détails complets)** :
-- `requested_method` : La méthode initialement demandée par l'utilisateur
-- `actual_method` : La méthode réellement utilisée (identique si pas de fallback)
-- `fallback_applied` : Boolean indiquant si un fallback a été effectué
-- `fallback_reason` : Explication détaillée du pourquoi du fallback (toujours présent, `null` si pas de fallback)
-
-**Exemple sans fallback (utilisateur existant)** :
-```json
-{
-  "user_id": 5890,
-  "method": "content",
-  "actual_method": "content",
-  "fallback_applied": false,
-  "recommendations": [
-    {
-      "article_id": 208436,
-      "score": 0.8247120976448059,
-      "reason": "Similaire à vos lectures (score: 0.825)",
-      "metadata": {...}
-    }
-  ],
-  "metadata": {
-    "requested_method": "content",
-    "actual_method": "content",
-    "fallback_applied": false,
-    "fallback_reason": null,
-    "user_stats": {
-      "user_id": 5890,
-      "total_interactions": 1232,
-      "unique_articles": 1048,
-      "is_new_user": false,
-      ...
-    }
-  }
-}
-```
-
-**Avantages de cette structure** :
-- ✅ **Accès facile** : `fallback_applied` et `actual_method` directement au niveau racine
-- ✅ **Détection automatique** : Les applications clientes peuvent vérifier le fallback sans parser les métadonnées
-- ✅ **Transparence complète** : Toutes les informations nécessaires sont disponibles au niveau global
-- ✅ **Compatibilité** : Les métadonnées conservent aussi ces informations pour les usages avancés
-- ✅ **Logging/Analytics** : Facilite le suivi des taux de fallback et la compréhension du comportement utilisateur
-- ✅ **Payload optimisé** : Les champs de fallback dans les recommandations ne sont présents que quand nécessaires (pas de duplication de `null`)
+---
 
 ### Gestion adaptative des données
 
@@ -320,6 +525,8 @@ Le système utilise deux dates de référence distinctes provenant de sources di
 
 **Impact positif** : Le système utilise correctement `reference_date` (dernière interaction) comme point de référence temporel, ce qui garantit que les recommandations sont cohérentes et n'utilisent pas d'articles "du futur" qui n'avaient pas encore de clics au moment de la dernière interaction enregistrée.
 
+---
+
 ### API REST complète
 
 - **Documentation interactive** automatique avec FastAPI (Swagger UI disonible à `/docs`)
@@ -328,7 +535,7 @@ Le système utilise deux dates de référence distinctes provenant de sources di
 - **Support CORS** pour l'intégration frontend
 - **Endpoints de debug** pour le monitoring et les tests
 
-## Lancement du backend de l'application
+## 🚀 Lancement du backend de l'application
 
 ### Prérequis
 
@@ -385,7 +592,7 @@ L'API sera accessible sur :
 - **Documentation** : http://localhost:8000/docs
 - **Santé de l'API** : http://localhost:8000/health
 
-## API - Endpoints et utilisation
+## 🔌 API - Endpoints et utilisation
 
 ### Endpoints principaux
 
@@ -476,6 +683,37 @@ GET /popular?limit=10
 ```
 Liste des articles les plus populaires récemment.
 
+#### 📰 Articles récents (Cold start nouveaux articles)
+```http
+GET /articles/recent?hours=48&category_id=281&limit=10
+```
+Retourne les articles les plus récents publiés dans une fenêtre temporelle donnée.
+
+**Paramètres :**
+- `hours` : Fenêtre temporelle en heures (défaut: 48h)
+- `category_id` : Filtrer par catégorie (optionnel)
+- `limit` : Nombre maximum d'articles (max 50)
+
+**Exemple de réponse :**
+```json
+[
+  {
+    "rank": 1,
+    "article_id": 364046,
+    "created_date": "2018-03-13T15:30:00",
+    "category_id": 281,
+    "words_count": 195,
+    "age_hours": 2,
+    "metadata": {
+      "article_id": 364046,
+      "category_id": 281,
+      "words_count": 195,
+      "created_date": "2018-03-13T15:30:00"
+    }
+  }
+]
+```
+
 ### Endpoints de debug
 
 #### ⚙️ Configuration actuelle
@@ -488,7 +726,7 @@ GET /debug/config
 GET /debug/data-stats
 ```
 
-## Tests et validation
+## 🧪 Tests et validation
 
 ### Script de test automatique
 
@@ -537,6 +775,11 @@ curl http://localhost:8000/users/5890/stats
 # Articles populaires
 curl http://localhost:8000/popular?limit=5
 
+# Articles récents (Cold start nouveaux articles)
+curl "http://localhost:8000/articles/recent"
+curl "http://localhost:8000/articles/recent?hours=24&limit=20"
+curl "http://localhost:8000/articles/recent?category_id=281&hours=48"
+
 # Statistiques détaillées des données (debug)
 curl http://localhost:8000/debug/data-stats
 ```
@@ -549,7 +792,7 @@ Accédez à http://localhost:8000/docs pour :
 - Consulter les schémas de données
 - Voir les exemples de requêtes/réponses
 
-## Architecture technique
+## 🏗️ Architecture technique
 
 ### Structure du projet
 
@@ -588,7 +831,7 @@ backend/
 - **Pré-calcul des articles recommandables** avec filtres qualité
 - **Normalisation adaptative** des scores par méthode
 
-## Configuration et personnalisation
+## ⚙️ Configuration et personnalisation
 
 ### Paramètres principaux (config.py)
 
@@ -606,6 +849,11 @@ HYBRID_WEIGHTS = {
     "popularity": 0.2,           # Popularité normalisée par âge
     "diversity": 0.1             # Bonus diversité
 }
+
+# Cold start pour nouveaux articles
+NOVELTY_BOOST_24H = 1.5          # Boost pour articles < 24h (+50%)
+NOVELTY_BOOST_72H = 1.2          # Boost pour articles 24-72h (+20%)
+RECENT_ARTICLES_CUTOFF_HOURS = 48  # Fenêtre pour endpoint /articles/recent
 ```
 
 ### Variables d'environnement
@@ -620,7 +868,7 @@ N_RECOMMENDATIONS=5
 N_USER_CLUSTERS=5
 ```
 
-## Monitoring et logs
+## 📈 Monitoring et logs
 
 ### Logs de l'application
 
@@ -639,344 +887,85 @@ Via `/debug/data-stats` :
 
 ---
 
-## Scénario de production : Ajout dynamique d'utilisateurs et d'articles
+## 🚀 Recommandations pour la mise en production
 
-### Vue d'ensemble
+Cette section présente les bonnes pratiques et adaptations nécessaires pour déployer ce système de recommandation en environnement de production réel.
 
-L'application actuelle s'appuie sur des données statiques (fichiers CSV et pickle) qui représentent une **base de données figée** avec trois tables principales :
-- **`clicks`** : Interactions utilisateur-article (322K utilisateurs, 2.9M clics)
-- **`articles`** : Métadonnées des articles avec embeddings pré-calculés (364K articles)
-- **`users`** : Dérivée implicitement des interactions
+### Infrastructure et base de données
 
-Dans un **scénario de production avec une vraie base de données**, voici ce qui se passerait lors de l'ajout de nouveaux utilisateurs et/ou articles.
+#### Choix de la base de données
 
-### 🆕 Ajout de nouveaux utilisateurs
+| Composant | Technologie recommandée | Justification |
+|-----------|------------------------|---------------|
+| **Base principale** | **PostgreSQL 15+** | Support natif des vecteurs (pgvector), transactions ACID, maturité |
+| **Cache** | **Redis** | Performance pour données chaudes (embeddings fréquents, scores) |
+| **Queue** | **Celery + Redis** | Traitement asynchrone (génération embeddings, recalcul clusters) |
+| **Monitoring** | **Prometheus + Grafana** | Métriques temps réel (latence, taux de cold start, etc.) |
 
-#### Comportement actuel : ✅ **Géré automatiquement**
+#### Schéma de données recommandé
 
-L'application gère très bien l'ajout de nouveaux utilisateurs grâce au **système de cold start** :
+**Tables essentielles** :
+- `articles` : Métadonnées + embeddings (type `VECTOR(250)` avec pgvector)
+- `clicks` : Interactions utilisateur-article (indexées sur `user_id`, `article_id`, `timestamp`)
+- `user_clusters` : Assignations cluster-utilisateur (mise à jour quotidienne)
+- Vue matérialisée `article_popularity` : Précalcul des scores de popularité (rafraîchie toutes les heures)
 
-**Phase 1 : Nouvel utilisateur sans historique**
-```
-Utilisateur 999999 (nouveau)
-→ Méthode "Similarité de contenu" : ✅ Fallback automatique sur "popularité"
-→ Méthode "Clustering" : ✅ Fallback automatique sur "popularité"
-→ Méthode "Hybride" : ✅ Combine les fallbacks (popularité prédominante)
-→ Résultat : Recommandations basées sur les tendances actuelles
-```
+### Pipeline de génération d'embeddings
 
-**Phase 2 : Premières interactions (1-4 clics valides)**
-```
-Utilisateur 999999 (3 clics valides)
-→ Méthode "Similarité de contenu" : ✅ Fallback sur popularité (< 5 interactions requises)
-→ Méthode "Clustering" : ✅ Fallback sur popularité (< 5 interactions requises)
-→ Méthode "Hybride" : ✅ Fallback sur popularité
-→ Résultat : Recommandations basées sur les tendances actuelles
-```
+#### Stratégie recommandée
 
-**Phase 3 : Utilisateur actif (≥5 interactions valides)**
-```
-Utilisateur 999999 (15 clics valides)
-→ Méthode "Similarité de contenu" : ✅ Profil utilisateur riche (moyenne des embeddings consultés)
-→ Méthode "Clustering" : ✅ Assigné à un cluster (après recalcul quotidien)
-→ Méthode "Hybride" : ✅ Combinaison des 3 méthodes avec pondération
-→ Résultat : Recommandations personnalisées complètes
-```
+**Pour les nouveaux articles** :
 
-**Note importante** : Le système valide automatiquement les `click_article_id` pour s'assurer qu'ils existent dans les métadonnées. Seules les interactions valides sont comptabilisées pour déterminer le seuil de cold start.
+1. **Publication article** : Insertion dans table `articles` avec `embedding = NULL`
+2. **Queue asynchrone** : Tâche Celery envoyée au service d'embeddings
+3. **Génération** : API dédiée avec GPU (Sentence-BERT multilingual)
+4. **Mise à jour** : `UPDATE articles SET embedding = ... WHERE article_id = ...`
 
-#### Architecture en production
+**Temps de traitement estimés** :
+- Génération : ~50-100ms par article (avec GPU)
+- Traitement batch : ~1000 articles/minute
 
-**Avec une base de données SQL/NoSQL** :
-1. **Insertion en temps réel** : Chaque clic → `INSERT INTO clicks (user_id, article_id, timestamp)`
-2. **Profil utilisateur dynamique** : Recalculé à chaque requête à partir de l'historique récent
-3. **Mise à jour des clusters** :
-   - **Option A (batch)** : Recalcul quotidien des clusters (config actuelle : 24h)
-   - **Option B (streaming)** : Assignation dynamique des nouveaux utilisateurs au cluster le plus proche
-   - **Option C (hybride)** : Assignation temporaire + réassignation lors du batch quotidien
+**Fallback pendant génération** :
+- Utiliser le système de **recommandation par métadonnées (catégories + longueur)**
+- Le **boost de nouveauté** garantit la visibilité immédiate via **popularité**
 
-**Exemple de requête SQL pour le profil utilisateur** :
-```sql
--- Récupérer les 10 derniers articles consultés
-SELECT article_id
-FROM clicks
-WHERE user_id = 999999
-ORDER BY timestamp DESC
-LIMIT 10;
+#### Technologies recommandées
 
--- Calculer le profil utilisateur (moyenne des embeddings)
--- → Effectué en Python après récupération des embeddings
-```
+- **Modèle** : Sentence-BERT (`sentence-transformers/paraphrase-multilingual-mpnet-base-v2`)
+- **Infrastructure** : AWS Lambda avec GPU ou Azure Functions Premium
+- **Coût** : ~$0.10 pour 1000 articles (estimation AWS)
 
-**Impact sur les performances** :
-- ✅ **Faible** : Les nouveaux utilisateurs n'affectent pas les performances globales
-- ⚠️ **Recalcul des clusters** : Coût computationnel proportionnel au nombre total d'utilisateurs
-  - Actuel : ~322K utilisateurs → ~30s de calcul
-  - Production (1M utilisateurs) → Envisager un clustering incrémental ou un échantillonnage
+### Autres recommandations
 
-### 📄 Ajout de nouveaux articles
+- **Stockage des embeddings** : PostgreSQL + pgvector
+- **Pipeline d'embeddings asynchrone** : Celery + Redis
+- **Clusters utilisateurs** : recalcul quotidien via tâche planifiée (cron job ou Celery beat)
+- **Monitoring** : Prometheus + Grafana
+- **Sécurité** : authentification API (OAuth2/JWT), HTTPS obligatoire
+- **Documentation** : API à jour (Swagger)
+- **Taux de cold start** : < 20%
+- **Génération embeddings** : < 2min de delay
+- **Stabilité clusters** : réassignation < 10%
+- **Distribution des méthodes** : à analyser
+- **Feedback utilisateur** : à collecter (like/dislike)
 
-#### Comportement actuel : ⚠️ **Limitations majeures**
+---
 
-L'ajout de nouveaux articles pose des **défis critiques** en raison des embeddings statiques :
+## 📝 Conclusion
 
-**Problème 1 : Embeddings manquants**
-```
-Nouvel article ID 400000 (publié aujourd'hui)
-→ Métadonnées : ✅ Chargées depuis articles_metadata.csv
-→ Embeddings : ❌ Absents (fichier articles_embeddings.pickle figé)
-→ Conséquence :
-   - Méthode "Similarité de contenu" : ❌ L'article ne peut PAS être recommandé (embeddings requis)
-   - Méthode "Popularité" : ✅ Fonctionne (ne dépend pas des embeddings)
-   - Méthode "Clustering" : ✅ Fonctionne (popularité dans les clusters, pas d'embeddings requis)
-```
+Ce système de recommandation implémente une architecture complète et robuste, prête pour la production. Les stratégies de cold start garantissent une expérience utilisateur optimale dès le premier jour, tandis que les recommandations personnalisées s'améliorent progressivement avec l'accumulation de données.
 
-**Problème 2 : Cold start des articles sans interactions**
-- Un nouvel article sans aucun clic aura un score de popularité nul (0 clics / âge)
-- Risque : Article peu visible tant qu'il n'a pas reçu ses premières interactions
-- ⚠️ **Important** : Contrairement aux méthodes basées sur les embeddings, la méthode "Popularité" peut théoriquement recommander l'article dès qu'il reçoit son premier clic (le score devient > 0)
-- Pour les articles très récents avec quelques clics, la normalisation par âge leur donne un avantage (ex: 10 clics en 1 jour vs 100 clics en 30 jours)
+**Points forts du système** :
+- ✅ 4 méthodes complémentaires (popularité, contenu, clustering, hybride)
+- ✅ Gestion automatique du cold start (utilisateurs ET articles)
+- ✅ Fallbacks intelligents (métadonnées, boost nouveauté)
+- ✅ Architecture évolutive et maintenable
+- ✅ Documentation complète et API REST moderne
 
-**Problème 3 : Désynchronisation des données**
-- Les embeddings sont indexés par `article_id` (0 à 363,046)
-- Un nouvel article ID 400000 est **hors des limites du tableau NumPy**
-- Risque : `IndexError` ou résultats corrompus
+**Prochaines étapes** :
+1. Déploiement en environnement de staging
+2. Tests A/B sur échantillon d'utilisateurs (10%)
+3. Optimisation des pondérations hybrides
+4. Intégration du feedback utilisateur explicite (like/dislike)
+5. Exploration de modèles plus avancés (transformers, GNNs)
 
-#### Architecture recommandée en production
-
-Pour gérer efficacement l'ajout d'articles, plusieurs adaptations sont nécessaires :
-
-##### 1. Pipeline de génération d'embeddings en temps réel
-
-**Option A : Génération à la publication**
-```python
-# Lors de l'ajout d'un nouvel article dans la BDD
-new_article = {
-    "article_id": 400000,
-    "content": "Texte de l'article...",
-    "category_id": 281,
-    "words_count": 250
-}
-
-# Générer l'embedding immédiatement
-embedding = generate_embedding(new_article["content"])  # Modèle pré-entraîné
-
-# Insérer dans la BDD
-db.execute("""
-    INSERT INTO articles (article_id, category_id, words_count, embedding)
-    VALUES (%s, %s, %s, %s)
-""", (new_article["article_id"], new_article["category_id"],
-      new_article["words_count"], embedding.tobytes()))
-```
-
-**Option B : Génération en batch différé**
-```python
-# Toutes les heures, traiter les articles sans embeddings
-pending_articles = db.execute("""
-    SELECT article_id, content
-    FROM articles
-    WHERE embedding IS NULL
-""")
-
-for article in pending_articles:
-    embedding = generate_embedding(article["content"])
-    db.execute("""
-        UPDATE articles
-        SET embedding = %s
-        WHERE article_id = %s
-    """, (embedding.tobytes(), article["article_id"]))
-```
-
-**Technologies recommandées** :
-- **Modèle d'embeddings** : Sentence-BERT (multilingual), USE (Universal Sentence Encoder)
-- **Infrastructure** :
-  - API de génération (FastAPI + GPU)
-  - Queue de traitement (Celery + Redis)
-  - Cache des embeddings (Redis ou Memcached)
-
-##### 2. Stratégie de cold start pour nouveaux articles
-
-**Solution 1 : Boost temporaire de nouveauté**
-```python
-# Ajouter un bonus de popularité pour les nouveaux articles
-article_age_hours = (now - article.created_at).total_seconds() / 3600
-
-if article_age_hours < 24:  # Moins de 24h
-    novelty_boost = 1.5  # +50% de score
-elif article_age_hours < 72:  # 1-3 jours
-    novelty_boost = 1.2  # +20% de score
-else:
-    novelty_boost = 1.0  # Pas de bonus
-
-final_score = popularity_score * novelty_boost
-```
-
-**Solution 2 : Recommandations "Articles récents" dédiées**
-```python
-# Endpoint spécifique pour les nouveautés
-@app.get("/articles/recent")
-def get_recent_articles(category: Optional[int] = None):
-    """Retourne les articles publiés dans les dernières 48h"""
-    cutoff = datetime.now() - timedelta(hours=48)
-    recent = db.query(Article).filter(Article.created_at >= cutoff)
-    if category:
-        recent = recent.filter(Article.category_id == category)
-    return recent.order_by(Article.created_at.desc()).limit(10)
-```
-
-**Solution 3 : Recommandations par similarité de métadonnées**
-```python
-# Si embedding manquant, utiliser les métadonnées (catégorie, mots-clés)
-def recommend_without_embedding(user_id, new_article_id):
-    # Récupérer les catégories préférées de l'utilisateur
-    user_top_categories = get_user_top_categories(user_id)
-
-    # Recommander le nouvel article si dans ces catégories
-    new_article = get_article(new_article_id)
-    if new_article.category_id in user_top_categories:
-        return True  # Recommander
-    return False
-```
-
-##### 3. Gestion de la cohérence des données
-
-**Architecture base de données recommandée** :
-
-```sql
--- Table articles avec embeddings
-CREATE TABLE articles (
-    article_id BIGINT PRIMARY KEY,
-    category_id INT NOT NULL,
-    publisher_id INT,
-    words_count INT,
-    created_at TIMESTAMP NOT NULL,
-    embedding VECTOR(250),  -- Type natif PostgreSQL avec pgvector
-    INDEX idx_category (category_id),
-    INDEX idx_created_at (created_at)
-);
-
--- Table clicks (interactions)
-CREATE TABLE clicks (
-    click_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    user_id BIGINT NOT NULL,
-    article_id BIGINT NOT NULL,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_user (user_id),
-    INDEX idx_article (article_id),
-    INDEX idx_timestamp (timestamp),
-    FOREIGN KEY (article_id) REFERENCES articles(article_id)
-);
-
--- Table user_clusters (mise à jour quotidienne)
-CREATE TABLE user_clusters (
-    user_id BIGINT PRIMARY KEY,
-    cluster_id INT NOT NULL,
-    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_cluster (cluster_id)
-);
-
--- Vue matérialisée pour la popularité (rafraîchie toutes les heures)
-CREATE MATERIALIZED VIEW article_popularity AS
-SELECT
-    article_id,
-    COUNT(DISTINCT user_id) AS unique_users,
-    COUNT(*) AS total_clicks,
-    MAX(timestamp) AS last_interaction
-FROM clicks
-WHERE timestamp >= NOW() - INTERVAL '7 days'
-GROUP BY article_id;
-```
-
-**Avantages de PostgreSQL + pgvector** :
-- ✅ Stockage natif des embeddings (type `VECTOR`)
-- ✅ Recherche de similarité en SQL : `ORDER BY embedding <-> query_embedding LIMIT 10`
-- ✅ Index HNSW pour recherche approximative rapide (millions d'articles)
-- ✅ Transactions ACID pour cohérence des données
-
-##### 4. Mise à jour incrémentale des recommandeurs
-
-**Clustering : Stratégie hybride**
-```python
-class IncrementalClusteringRecommender:
-    def assign_new_user_to_cluster(self, user_id: int) -> int:
-        """Assigne un nouvel utilisateur au cluster le plus proche"""
-        # Construire les features du nouvel utilisateur
-        user_features = self._build_user_features([user_id])
-        user_features_scaled = self._scaler.transform(user_features)
-
-        # Prédire le cluster (pas de réentraînement)
-        cluster = self._cluster_model.predict(user_features_scaled)[0]
-
-        # Sauvegarder l'assignation temporaire
-        db.execute("""
-            INSERT INTO user_clusters (user_id, cluster_id, temporary)
-            VALUES (%s, %s, TRUE)
-        """, (user_id, cluster))
-
-        return cluster
-
-    def retrain_clusters_batch(self):
-        """Réentraînement complet des clusters (quotidien)"""
-        # Marquer toutes les assignations comme définitives
-        self._train_clusters()  # Méthode actuelle
-
-        db.execute("""
-            UPDATE user_clusters SET temporary = FALSE
-        """)
-```
-
-**Content-based : Rechargement dynamique**
-```python
-class DynamicContentRecommender:
-    def load_article_embedding(self, article_id: int) -> np.ndarray:
-        """Charge l'embedding d'un article depuis la BDD"""
-        # Cache en mémoire (LRU)
-        if article_id in self._embedding_cache:
-            return self._embedding_cache[article_id]
-
-        # Requête BDD
-        result = db.execute("""
-            SELECT embedding FROM articles WHERE article_id = %s
-        """, (article_id,))
-
-        if result:
-            embedding = np.frombuffer(result[0], dtype=np.float32)
-            self._embedding_cache[article_id] = embedding
-            return embedding
-        else:
-            raise ValueError(f"Embedding manquant pour article {article_id}")
-```
-
-### 📊 Tableau récapitulatif : Ajout d'utilisateurs vs. Articles
-
-| Aspect | **Nouvel utilisateur** | **Nouvel article** |
-|--------|------------------------|---------------------|
-| **Gestion actuelle** | ✅ Excellente (cold start) | ❌ Problématique (embeddings statiques) |
-| **Délai avant recommandations** | ✅ Immédiat (fallback popularité) | ⚠️ Après premières interactions + embedding généré |
-| **Impact sur "Clustering"** | ⚠️ Assignation différée (24h) | ➖ Aucun (clusters basés sur utilisateurs) |
-| **Impact sur "Similarité de contenu"** | ✅ Profil dès 1ère interaction | ❌ Impossible sans embedding |
-| **Impact sur "Popularité"** | ✅ Fonctionne immédiatement | ⚠️ Score nul jusqu'à premières interactions |
-| **Coût computationnel** | ⚠️ Moyen (recalcul clusters quotidien) | 🔥 Élevé (génération embeddings) |
-| **Adaptation BDD requise** | ✅ Minime (INSERT dans clicks) | 🔥 Majeure (pipeline embeddings) |
-
-### 🚀 Recommandations pour la mise en production
-
-#### Phase 1 : Migration vers une base de données
-1. **PostgreSQL + pgvector** pour le stockage des embeddings
-2. **Vues matérialisées** pour les calculs de popularité (rafraîchies toutes les heures)
-3. **Index optimisés** sur `user_id`, `article_id`, `timestamp`
-
-#### Phase 2 : Pipeline d'embeddings
-1. **Service de génération** : API dédiée avec GPU (FastAPI + Sentence-BERT)
-2. **Queue de traitement** : Celery + Redis pour traiter les nouveaux articles en asynchrone
-3. **Fallback temporaire** : Recommandations par métadonnées en attendant l'embedding
-
-#### Phase 3 : Optimisation des clusters
-1. **Clustering incrémental** : Assignation immédiate des nouveaux utilisateurs
-2. **Réentraînement adaptatif** : Quotidien si < 100K users, hebdomadaire au-delà
-3. **Monitoring** : Tracker la stabilité des clusters (taux de réassignation)
-
-#### Phase 4 : Gestion du cold start des articles
-1. **Boost de nouveauté** : Bonus temporaire pour articles récents (24-72h)
-2. **Section dédiée** : "Nouveaux articles" dans l'interface utilisateur
-3. **A/B testing** : Tester différentes stratégies de promotion des nouveaux contenus

@@ -302,6 +302,57 @@ async def get_popular_articles(limit: int = 10):
         logger.error(f"❌ Erreur articles populaires: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
 
+@app.get("/articles/recent", response_model=List[dict])
+async def get_recent_articles(
+    hours: Optional[int] = None,
+    category_id: Optional[int] = None,
+    limit: int = 10
+):
+    """
+    Solution 2: Articles récents dédiés (cold start pour nouveaux articles)
+
+    Retourne les articles les plus récents publiés dans une fenêtre temporelle donnée.
+
+    - **hours**: Fenêtre temporelle en heures (défaut: 48h configuré dans RECENT_ARTICLES_CUTOFF_HOURS)
+    - **category_id**: Filtrer par catégorie (optionnel)
+    - **limit**: Nombre maximum d'articles à retourner (max 50)
+    """
+    try:
+        if limit > 50:
+            limit = 50
+
+        recent = data_loader.get_recent_articles(
+            hours=hours,
+            category_id=category_id,
+            limit=limit
+        )
+
+        if len(recent) == 0:
+            return []
+
+        results = []
+        for i, row in enumerate(recent.itertuples()):
+            results.append({
+                "rank": i + 1,
+                "article_id": int(row.article_id),
+                "created_date": row.created_date.isoformat(),
+                "category_id": int(row.category_id),
+                "words_count": int(row.words_count),
+                "age_hours": int((data_loader._get_reference_date() - row.created_date).total_seconds() / 3600),
+                "metadata": {
+                    "article_id": int(row.article_id),
+                    "category_id": int(row.category_id),
+                    "words_count": int(row.words_count),
+                    "created_date": row.created_date.isoformat()
+                }
+            })
+
+        return results
+
+    except Exception as e:
+        logger.error(f"❌ Erreur articles récents: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
+
 @app.get("/clusters", response_model=dict)
 async def get_clusters_characteristics():
     """

@@ -31,7 +31,14 @@ class Settings(BaseSettings):
     
     # Fréquence de mise à jour des clusters (en heures)
     CLUSTER_UPDATE_FREQUENCY_HOURS: int = 24
-    
+
+    # Solution 1: Boost temporaire de nouveauté (cold start nouveaux articles)
+    NOVELTY_BOOST_24H: float = 1.5   # +50% de score pour articles < 24h
+    NOVELTY_BOOST_72H: float = 1.2   # +20% de score pour articles 24-72h
+
+    # Solution 2: Recommandations "Articles récents" dédiées
+    RECENT_ARTICLES_CUTOFF_HOURS: int = 48  # Fenêtre par défaut pour articles récents
+
     # Date de référence (auto-détectée si None)
     REFERENCE_DATE: Optional[datetime] = None
     
