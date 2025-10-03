@@ -230,7 +230,7 @@ L'application implémente **4 méthodes de recommandation** complémentaires :
 raw_score = (0.7 × unique_users + 0.3 × total_clicks)
 popularity_score = raw_score / article_age_months
 
-# Étape 2 : Boost temporaire de nouveauté (pour les nouveaux aerticles)
+# Étape 2 : Boost temporaire de nouveauté (pour les nouveaux articles)
 if article_age_hours < 24:
     final_score = popularity_score × 1.5  # +50% pour articles < 24h
 elif article_age_hours < 72:
