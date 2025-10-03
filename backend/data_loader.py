@@ -200,7 +200,7 @@ class DataLoader:
 
         return result
     
-    def get_recent_articles(self, hours: int = None, category_id: int = None, limit: int = 10) -> pd.DataFrame:
+    def get_recent_articles(self, hours: Optional[int] = None, category_id: Optional[int] = None, limit: int = 10) -> pd.DataFrame:
         """
         Solution 2: Récupère les articles récents (cold start pour nouveaux articles)
 
@@ -240,6 +240,49 @@ class DataLoader:
         """Récupère la liste de tous les utilisateurs"""
         interactions = self.load_user_interactions()
         return sorted(interactions['user_id'].unique().tolist())
+
+    def get_most_active_users(self, limit: int = 20) -> List[Dict]:
+        """
+        Récupère les utilisateurs les plus actifs
+
+        Args:
+            limit: Nombre d'utilisateurs à retourner
+
+        Returns:
+            Liste de dictionnaires avec user_id et nombre de clics
+        """
+        interactions = self.load_user_interactions()
+
+        if len(interactions) == 0:
+            logger.warning("⚠️ Aucune interaction disponible")
+            return []
+
+        # Compter les clics par utilisateur
+        user_clicks = interactions.groupby('user_id').size().reset_index(name='total_clicks')
+
+        # Calculer les articles uniques par utilisateur
+        unique_articles = interactions.groupby('user_id')['click_article_id'].nunique().reset_index(name='unique_articles')
+
+        # Merger les deux
+        user_stats = user_clicks.merge(unique_articles, on='user_id')
+
+        # Trier par nombre de clics décroissant
+        user_stats = user_stats.sort_values('total_clicks', ascending=False)
+
+        # Limiter aux N premiers
+        top_users = user_stats.head(limit)
+
+        # Convertir en liste de dictionnaires
+        result = []
+        for _, row in top_users.iterrows():
+            result.append({
+                'user_id': int(row['user_id']),
+                'total_clicks': int(row['total_clicks']),
+                'unique_articles': int(row['unique_articles'])
+            })
+
+        logger.info(f"👥 Top {limit} utilisateurs actifs récupérés")
+        return result
     
     def get_article_info(self, article_id: int) -> Dict:
         """Récupère les informations d'un article"""

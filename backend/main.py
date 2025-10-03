@@ -187,19 +187,40 @@ async def recommend_for_user(
 async def get_users(limit: int = 100):
     """
     Liste des utilisateurs disponibles (pour tests)
-    
+
     - **limit**: Nombre maximum d'utilisateurs à retourner
     """
     try:
         all_users = data_loader.get_all_users()
-        
+
         if limit > 1000:
             limit = 1000
-            
+
         return all_users[:limit]
-        
+
     except Exception as e:
         logger.error(f"❌ Erreur récupération utilisateurs: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
+
+@app.get("/users/active", response_model=List[dict])
+async def get_most_active_users(limit: int = 20):
+    """
+    Liste des utilisateurs les plus actifs
+
+    - **limit**: Nombre maximum d'utilisateurs à retourner (max 100)
+    """
+    try:
+        if limit > 100:
+            limit = 100
+
+        if limit < 1:
+            limit = 1
+
+        active_users = data_loader.get_most_active_users(limit)
+        return active_users
+
+    except Exception as e:
+        logger.error(f"❌ Erreur récupération utilisateurs actifs: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
 
 @app.get("/users/{user_id}/stats", response_model=dict)
@@ -248,58 +269,6 @@ async def get_user_segment(user_id: int):
         raise
     except Exception as e:
         logger.error(f"❌ Erreur segment user {user_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
-
-@app.get("/articles/{article_id}", response_model=dict)
-async def get_article_info(article_id: int):
-    """
-    Informations sur un article
-    
-    - **article_id**: ID de l'article
-    """
-    try:
-        article_info = data_loader.get_article_info(article_id)
-        
-        if "error" in article_info:
-            raise HTTPException(status_code=404, detail=article_info["error"])
-            
-        return article_info
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"❌ Erreur article {article_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
-
-@app.get("/popular", response_model=List[dict])
-async def get_popular_articles(limit: int = 10):
-    """
-    Articles populaires récemment
-
-    - **limit**: Nombre d'articles à retourner (max 50)
-    """
-    try:
-        if limit > 50:
-            limit = 50
-
-        popular = data_loader.get_recent_popular_articles()
-
-        results = []
-        for i, (article_id, row) in enumerate(popular.head(limit).iterrows()):
-            article_info = data_loader.get_article_info(article_id)
-            results.append({
-                "rank": i + 1,
-                "article_id": article_id,
-                "popularity_score": float(row['popularity_score']),
-                "unique_users": int(row['unique_users']),
-                "total_clicks": int(row['total_clicks']),
-                "metadata": article_info
-            })
-
-        return results
-
-    except Exception as e:
-        logger.error(f"❌ Erreur articles populaires: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
 
 @app.get("/articles/recent", response_model=List[dict])
@@ -351,6 +320,59 @@ async def get_recent_articles(
 
     except Exception as e:
         logger.error(f"❌ Erreur articles récents: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
+
+@app.get("/articles/{article_id}", response_model=dict)
+async def get_article_info(article_id: int):
+    """
+    Informations sur un article
+
+    - **article_id**: ID de l'article
+    """
+    try:
+        article_info = data_loader.get_article_info(article_id)
+
+        if "error" in article_info:
+            raise HTTPException(status_code=404, detail=article_info["error"])
+
+        return article_info
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Erreur article {article_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
+
+@app.get("/popular", response_model=List[dict])
+async def get_popular_articles(limit: int = 10):
+    """
+    Articles populaires récemment
+
+    - **limit**: Nombre d'articles à retourner (max 50)
+    """
+    try:
+        if limit > 50:
+            limit = 50
+
+        popular = data_loader.get_recent_popular_articles()
+
+        results = []
+        for i, (article_id, row) in enumerate(popular.head(limit).iterrows()):
+            article_info = data_loader.get_article_info(article_id)
+            results.append({
+                "rank": i + 1,
+                "article_id": article_id,
+                "popularity_score": float(row['popularity_score']),
+                "unique_users": int(row['unique_users']),
+                "total_clicks": int(row['total_clicks']),
+                "created_date": article_info.get("created_date"),
+                "metadata": article_info
+            })
+
+        return results
+
+    except Exception as e:
+        logger.error(f"❌ Erreur articles populaires: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
 
 @app.get("/clusters", response_model=dict)
