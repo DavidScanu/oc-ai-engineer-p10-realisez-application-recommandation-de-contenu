@@ -16,6 +16,7 @@ interface DataStats {
     min_article_date?: string;
     max_article_date?: string;
   };
+  reference_date?: string;
   unique_users?: number;
   total_articles?: number;
   total_interactions?: number;
@@ -202,6 +203,9 @@ export default function StatisticsPage() {
                     </div>
                     <div>
                       <span className="font-semibold">Au:</span> {formatDate(dataStats?.date_range?.max_article_date)}
+                    </div>
+                    <div className="pt-2 border-t mt-2">
+                      <span className="font-semibold">Référence:</span> {formatDate(dataStats?.reference_date)}
                     </div>
                   </div>
                 </CardContent>
