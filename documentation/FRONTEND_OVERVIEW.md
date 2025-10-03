@@ -125,7 +125,7 @@ InsightsPage
   - `GET /users` - Liste utilisateurs
   - `POST /recommend/{user_id}` - Recommandations
   - `GET /users/{user_id}/stats` - Stats utilisateur
-  - `GET /popular` - Articles populaires
+  - `GET /articles/popular` - Articles populaires
   - `GET /articles/recent` - Articles récents
 
 ## 🎨 UI/UX Highlights

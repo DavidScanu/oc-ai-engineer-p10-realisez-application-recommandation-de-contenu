@@ -140,7 +140,7 @@ L'application communique avec le backend FastAPI via le client API (`lib/api.ts`
 | `GET /users` | Liste des utilisateurs |
 | `POST /recommend/{user_id}` | Recommandations |
 | `GET /users/{user_id}/stats` | Statistiques utilisateur |
-| `GET /popular` | Articles populaires |
+| `GET /articles/popular` | Articles populaires |
 | `GET /articles/recent` | Articles récents |
 
 ### Exemple de requête

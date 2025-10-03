@@ -96,7 +96,7 @@ class ApiClient {
 
   // Get popular articles
   async getPopularArticles(limit: number = 10): Promise<PopularArticle[]> {
-    return this.fetch<PopularArticle[]>(`/popular?limit=${limit}`);
+    return this.fetch<PopularArticle[]>(`/articles/popular?limit=${limit}`);
   }
 
   // Get recent articles

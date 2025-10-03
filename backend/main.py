@@ -322,28 +322,7 @@ async def get_recent_articles(
         logger.error(f"❌ Erreur articles récents: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
 
-@app.get("/articles/{article_id}", response_model=dict)
-async def get_article_info(article_id: int):
-    """
-    Informations sur un article
-
-    - **article_id**: ID de l'article
-    """
-    try:
-        article_info = data_loader.get_article_info(article_id)
-
-        if "error" in article_info:
-            raise HTTPException(status_code=404, detail=article_info["error"])
-
-        return article_info
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"❌ Erreur article {article_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
-
-@app.get("/popular", response_model=List[dict])
+@app.get("/articles/popular", response_model=List[dict])
 async def get_popular_articles(limit: int = 10):
     """
     Articles populaires récemment
@@ -373,6 +352,27 @@ async def get_popular_articles(limit: int = 10):
 
     except Exception as e:
         logger.error(f"❌ Erreur articles populaires: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
+
+@app.get("/articles/{article_id}", response_model=dict)
+async def get_article_info(article_id: int):
+    """
+    Informations sur un article
+
+    - **article_id**: ID de l'article
+    """
+    try:
+        article_info = data_loader.get_article_info(article_id)
+
+        if "error" in article_info:
+            raise HTTPException(status_code=404, detail=article_info["error"])
+
+        return article_info
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Erreur article {article_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
 
 @app.get("/clusters", response_model=dict)

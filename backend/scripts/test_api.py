@@ -98,7 +98,7 @@ class APITester:
     def test_popular_articles(self, limit: int = 10):
         """Test articles populaires"""
         print(f"\n🔥 Test Popular Articles (limit={limit})...")
-        response = requests.get(f"{self.base_url}/popular?limit={limit}")
+        response = requests.get(f"{self.base_url}/articles/popular?limit={limit}")
         
         if response.status_code == 200:
             articles = response.json()
