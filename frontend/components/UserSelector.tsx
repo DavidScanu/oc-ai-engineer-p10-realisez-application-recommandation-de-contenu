@@ -30,11 +30,6 @@ export function UserSelector({ onUserSelect, selectedUserId }: UserSelectorProps
       try {
         const userList = await apiClient.getMostActiveUsers(20);
         setActiveUsers(userList);
-
-        // Auto-select first user if none selected
-        if (!selectedUserId && userList.length > 0) {
-          onUserSelect(userList[0].user_id);
-        }
       } catch (error) {
         console.error('Error fetching users:', error);
       } finally {
@@ -51,7 +46,6 @@ export function UserSelector({ onUserSelect, selectedUserId }: UserSelectorProps
     const userId = parseInt(manualUserId);
     if (!isNaN(userId) && userId > 0) {
       onUserSelect(userId);
-      setManualUserId('');
     }
   };
 
@@ -59,7 +53,7 @@ export function UserSelector({ onUserSelect, selectedUserId }: UserSelectorProps
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <User className="h-5 w-5" />
+          <User className="h-5 w-5 text-blue-600" />
           Sélection de l&apos;utilisateur
         </CardTitle>
         <CardDescription>

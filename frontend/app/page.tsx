@@ -10,7 +10,7 @@ import { RecommendationCard } from '@/components/RecommendationCard';
 import { UserStatsCard } from '@/components/UserStatsCard';
 import { FallbackAlert } from '@/components/FallbackAlert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, TrendingUp, Clock, BarChart3 } from 'lucide-react';
+import { Loader2, TrendingUp, Clock, BarChart3, Settings } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 
@@ -99,7 +99,10 @@ export default function HomePage() {
             {/* Method Selector */}
             <Card>
               <CardHeader>
-                <CardTitle>Paramètres de recommandation</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5 text-blue-600" />
+                  Paramètres de recommandation
+                </CardTitle>
                 <CardDescription>
                   Sélectionnez la méthode de recommandation à utiliser
                 </CardDescription>
@@ -123,7 +126,7 @@ export default function HomePage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
+                  <TrendingUp className="h-5 w-5 text-blue-600" />
                   Recommandations
                   {recommendations && (
                     <Badge variant="secondary" className="ml-2">

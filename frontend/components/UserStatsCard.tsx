@@ -15,7 +15,7 @@ export function UserStatsCard({ stats }: UserStatsCardProps) {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
+            <BarChart3 className="h-5 w-5 text-blue-600" />
             Statistiques utilisateur
           </span>
           {stats.is_new_user && (

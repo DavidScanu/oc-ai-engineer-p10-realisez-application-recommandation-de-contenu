@@ -216,7 +216,7 @@ export default function StatisticsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
+                  <TrendingUp className="h-5 w-5 text-rose-600" />
                   Top 10 Utilisateurs Actifs
                 </CardTitle>
                 <CardDescription>

@@ -9,30 +9,34 @@ interface MethodSelectorProps {
   onMethodChange: (method: RecommendationMethod) => void;
 }
 
-const methods: { value: RecommendationMethod; label: string; icon: React.ElementType; description: string }[] = [
+const methods: { value: RecommendationMethod; label: string; icon: React.ElementType; description: string; color: string }[] = [
   {
     value: 'hybrid',
     label: 'Hybride',
     icon: Layers,
-    description: 'Combinaison intelligente de toutes les méthodes'
+    description: 'Combinaison intelligente de toutes les méthodes',
+    color: 'text-purple-600'
   },
   {
     value: 'popularity',
     label: 'Popularité',
     icon: Sparkles,
-    description: 'Articles tendances normalisés par âge'
+    description: 'Articles tendances normalisés par âge',
+    color: 'text-amber-600'
   },
   {
     value: 'content',
     label: 'Contenu',
     icon: FileText,
-    description: 'Similarité basée sur les embeddings'
+    description: 'Similarité basée sur les embeddings',
+    color: 'text-blue-600'
   },
   {
     value: 'clustering',
     label: 'Clustering',
     icon: Users,
-    description: 'Filtrage collaboratif par segments'
+    description: 'Filtrage collaboratif par segments',
+    color: 'text-green-600'
   },
 ];
 
@@ -49,7 +53,7 @@ export function MethodSelector({ method, onMethodChange }: MethodSelectorProps) 
               const Icon = m.icon;
               return (
                 <TabsTrigger key={m.value} value={m.value} className="flex items-center gap-1">
-                  <Icon className="h-4 w-4" />
+                  <Icon className={`h-4 w-4 ${m.color}`} />
                   <span className="hidden sm:inline">{m.label}</span>
                 </TabsTrigger>
               );
