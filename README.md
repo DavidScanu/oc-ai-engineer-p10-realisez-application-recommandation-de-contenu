@@ -1033,12 +1033,18 @@ L'application frontend est une interface web moderne développée avec **Next.js
 
 #### 🚀 Features Bonus
 
-6. **Page Insights & Analytics** (`/insights`)
+6. **Page Statistiques** (`/statistics`)
+   - **Vue d'ensemble** : Cards avec métriques clés (utilisateurs, articles, interactions, catégories)
+   - **Statistiques détaillées** : Moyenne mots/article, interactions/utilisateur, période des données
+   - **Top 10 utilisateurs actifs** : Classement avec nombre de clics et articles uniques consultés
+   - Design responsive avec icônes et cartes interactives
+
+7. **Page Insights & Analytics** (`/insights`)
    - **Articles populaires** : Top 10 avec scores de popularité
    - **Articles récents** : Nouveaux articles des 48 dernières heures
    - Navigation par onglets entre les deux vues
 
-7. **Design moderne & UX**
+8. **Design moderne & UX**
    - Interface élégante avec palette bleu/violet
    - Composants shadcn/ui (Card, Button, Select, Badge, Tabs)
    - Responsive design (mobile, tablette, desktop)
@@ -1079,6 +1085,8 @@ Pour la production, modifiez avec l'URL de votre backend déployé (ex: Azure Fu
 frontend/
 ├── app/                    # Pages Next.js (App Router)
 │   ├── page.tsx           # Page principale - Recommandations
+│   ├── statistics/        # Page Statistiques
+│   │   └── page.tsx
 │   ├── insights/          # Page Analytics
 │   │   └── page.tsx
 │   ├── layout.tsx         # Layout global
@@ -1133,6 +1141,12 @@ Interface de recommandation personnalisée :
 - Statistiques utilisateur en temps réel
 - Indicateur de fallback automatique
 
+#### Page Statistiques (`/statistics`)
+Vue d'ensemble des données et utilisateurs actifs :
+- **Métriques clés** : Cards avec nombre total d'utilisateurs, articles, interactions, catégories
+- **Statistiques détaillées** : Moyenne de mots par article, interactions par utilisateur, période des données
+- **Top 10 utilisateurs actifs** : Classement des utilisateurs les plus engagés avec nombre de clics et articles uniques
+
 #### Page Insights (`/insights`)
 Tableau de bord analytique :
 - **Onglet Populaires** : Top 10 avec score de popularité, utilisateurs uniques, total de clics
@@ -1146,11 +1160,12 @@ L'application communique avec le backend FastAPI via un client API typé (`lib/a
 **Endpoints utilisés** :
 - `GET /health` - Vérification de l'API
 - `GET /users` - Liste des utilisateurs
-- `GET /users/active` - Utilisateurs les plus actifs (nouveau)
+- `GET /users/active` - Utilisateurs les plus actifs
 - `POST /recommend/{user_id}` - Recommandations
 - `GET /users/{user_id}/stats` - Statistiques utilisateur
 - `GET /popular` - Articles populaires
 - `GET /articles/recent` - Articles récents
+- `GET /debug/data-stats` - Statistiques globales des données
 
 **Exemple de requête** :
 ```typescript

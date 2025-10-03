@@ -59,6 +59,12 @@ export default function HomePage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <Link href="/statistics">
+                <Badge variant="outline" className="text-sm cursor-pointer hover:bg-accent flex items-center gap-1">
+                  <BarChart3 className="h-3 w-3" />
+                  Statistiques
+                </Badge>
+              </Link>
               <Link href="/insights">
                 <Badge variant="outline" className="text-sm cursor-pointer hover:bg-accent flex items-center gap-1">
                   <BarChart3 className="h-3 w-3" />
