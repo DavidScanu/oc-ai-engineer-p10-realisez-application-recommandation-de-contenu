@@ -9,6 +9,15 @@ if [ ! -f "main.py" ]; then
     exit 1
 fi
 
+# Activer l'environnement virtuel Python s'il existe
+if [ -d "venv" ]; then
+    echo "🐍 Activation de l'environnement virtuel..."
+    source venv/bin/activate
+elif [ -d ".venv" ]; then
+    echo "🐍 Activation de l'environnement virtuel..."
+    source .venv/bin/activate
+fi
+
 # Vérifier que les dépendances sont installées
 if ! python3 -c "import fastapi" &> /dev/null; then
     echo "📦 Installation des dépendances..."
