@@ -91,11 +91,15 @@ Nous développons une interface simple qui :
 - [ ] Tests de performance et monitoring
 - [ ] Optimisation des coûts (gestion des services gratuits)
 
-### Phase 5 : Application frontend (À venir)
-- [ ] Interface de sélection des utilisateurs
-- [ ] Affichage des recommandations avec métadonnées
-- [ ] Intégration avec Azure Functions
-- [ ] Tests utilisateurs avec Samia
+### Phase 5 : Application frontend (✅ Complété)
+- [x] Interface de sélection des utilisateurs
+- [x] Affichage des recommandations avec métadonnées
+- [x] Switch entre les 4 méthodes de recommandation
+- [x] Indicateur de fallback visuel
+- [x] Statistiques utilisateur en temps réel
+- [x] Page Insights (articles populaires et récents)
+- [x] Design responsive avec Tailwind CSS et shadcn/ui
+- [x] Intégration complète avec le backend FastAPI
 
 ### Phase 6 : Documentation et présentation (À venir)
 - [ ] Finalisation du README technique
@@ -655,6 +659,31 @@ GET /users?limit=100
 ```
 Retourne la liste des utilisateurs disponibles pour les tests.
 
+#### 🏆 Utilisateurs les plus actifs
+```http
+GET /users/active?limit=20
+```
+Retourne les utilisateurs les plus actifs avec leurs statistiques détaillées.
+
+**Paramètres :**
+- `limit` : Nombre maximum d'utilisateurs (max 100, défaut: 20)
+
+**Exemple de réponse :**
+```json
+[
+  {
+    "user_id": 5890,
+    "total_clicks": 156,
+    "unique_articles": 89
+  },
+  {
+    "user_id": 12345,
+    "total_clicks": 143,
+    "unique_articles": 76
+  }
+]
+```
+
 #### 📊 Statistiques d'un utilisateur
 ```http
 GET /users/{user_id}/stats
@@ -957,6 +986,267 @@ Ce système de recommandation implémente une architecture complète et robuste,
 - ✅ Fallbacks intelligents (métadonnées, boost nouveauté)
 - ✅ Architecture évolutive et maintenable
 - ✅ Documentation complète et API REST moderne
+
+---
+
+# Frontend Next.js
+
+## 🎨 Application de recommandation Next.js
+
+L'application frontend est une interface web moderne développée avec **Next.js 15**, **TypeScript** et **Tailwind CSS** qui permet d'interagir avec le système de recommandation.
+
+### ✨ Fonctionnalités implémentées
+
+#### 🎯 Core Features (Requises)
+
+1. **Sélection d'utilisateur**
+   - Dropdown permettant de choisir parmi les **20 utilisateurs les plus actifs** (avec statistiques de clics et articles)
+   - **Recherche manuelle par ID** : Champ de saisie pour entrer n'importe quel ID utilisateur
+   - Auto-sélection du premier utilisateur au chargement
+   - État de chargement avec spinner
+
+2. **Recommandations personnalisées**
+   - Affichage des 5 meilleurs articles recommandés
+   - Détails complets : ID, score, catégorie, nombre de mots, date
+   - Raison de la recommandation (reason) affichée
+
+3. **Switch entre méthodes de recommandation**
+   - 4 onglets pour basculer entre les méthodes :
+     - 🎭 **Hybride** (par défaut) : Combinaison intelligente
+     - 🔥 **Popularité** : Articles tendances normalisés
+     - 📖 **Contenu** : Similarité basée embeddings
+     - 👥 **Clustering** : Filtrage collaboratif
+   - Interface à onglets avec icônes et descriptions
+
+4. **Indicateur de fallback**
+   - Alerte visuelle en temps réel :
+     - ✅ **Vert** : Recommandation normale (méthode demandée)
+     - ⚠️ **Jaune** : Fallback appliqué (avec raison détaillée)
+   - Affiche : Méthode demandée → Méthode réelle + raison
+
+5. **Statistiques utilisateur**
+   - Card dédiée avec métriques clés :
+     - ID utilisateur
+     - Articles uniques lus
+     - Total d'interactions
+     - Badge "Nouvel utilisateur" si applicable
+
+#### 🚀 Features Bonus
+
+6. **Page Insights & Analytics** (`/insights`)
+   - **Articles populaires** : Top 10 avec scores de popularité
+   - **Articles récents** : Nouveaux articles des 48 dernières heures
+   - Navigation par onglets entre les deux vues
+
+7. **Design moderne & UX**
+   - Interface élégante avec palette bleu/violet
+   - Composants shadcn/ui (Card, Button, Select, Badge, Tabs)
+   - Responsive design (mobile, tablette, desktop)
+   - Loading states et transitions fluides
+   - Navigation sticky header avec branding
+
+### 🚀 Démarrage rapide
+
+```bash
+# Se placer dans le dossier frontend
+cd frontend
+
+# Méthode 1 : Script automatique (recommandé)
+./start.sh
+
+# Méthode 2 : Manuelle
+npm install
+cp .env.example .env.local
+npm run dev
+```
+
+L'application sera accessible sur **http://localhost:3000**
+
+### ⚙️ Configuration
+
+Créez un fichier `.env.local` dans `frontend/` :
+
+```bash
+# URL du backend
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+Pour la production, modifiez avec l'URL de votre backend déployé (ex: Azure Functions).
+
+### 📂 Structure du projet
+
+```
+frontend/
+├── app/                    # Pages Next.js (App Router)
+│   ├── page.tsx           # Page principale - Recommandations
+│   ├── insights/          # Page Analytics
+│   │   └── page.tsx
+│   ├── layout.tsx         # Layout global
+│   └── globals.css        # Styles globaux
+├── components/            # Composants React
+│   ├── ui/               # Composants shadcn/ui
+│   │   ├── card.tsx
+│   │   ├── button.tsx
+│   │   ├── select.tsx
+│   │   ├── badge.tsx
+│   │   └── tabs.tsx
+│   ├── UserSelector.tsx       # Sélecteur d'utilisateur
+│   ├── MethodSelector.tsx     # Sélecteur de méthode
+│   ├── RecommendationCard.tsx # Card d'article recommandé
+│   ├── UserStatsCard.tsx      # Statistiques utilisateur
+│   └── FallbackAlert.tsx      # Alerte de fallback
+├── lib/                   # Utilitaires et logique métier
+│   ├── api.ts            # Client API TypeScript
+│   ├── types.ts          # Types TypeScript
+│   └── utils.ts          # Fonctions utilitaires
+├── .env.local            # Variables d'environnement (local)
+├── .env.example          # Template de configuration
+├── start.sh              # Script de démarrage
+├── README.md             # Documentation complète
+└── FEATURES.md           # Liste détaillée des features
+```
+
+### 🎨 Technologies utilisées
+
+**Core**
+- **Next.js 15** : Framework React avec App Router
+- **TypeScript** : Typage statique
+- **React 19** : Bibliothèque UI
+
+**Styling**
+- **Tailwind CSS 4** : Framework CSS utility-first
+- **shadcn/ui** : Composants UI réutilisables et accessibles
+- **Lucide React** : Icônes modernes
+
+**State & Data**
+- **Fetch API** : Communication avec le backend
+- **React Hooks** : useState, useEffect, useCallback
+
+### 📊 Pages disponibles
+
+#### Page principale (`/`)
+Interface de recommandation personnalisée :
+- Sélection d'utilisateur avec dropdown (top 20 utilisateurs actifs)
+- Recherche manuelle par ID utilisateur
+- Choix de la méthode de recommandation (4 onglets)
+- Affichage des 5 articles recommandés
+- Statistiques utilisateur en temps réel
+- Indicateur de fallback automatique
+
+#### Page Insights (`/insights`)
+Tableau de bord analytique :
+- **Onglet Populaires** : Top 10 avec score de popularité, utilisateurs uniques, total de clics
+- **Onglet Récents** : Nouveaux articles des 48h avec date, catégorie, âge
+- Navigation fluide entre les onglets
+
+### 🔌 Intégration Backend
+
+L'application communique avec le backend FastAPI via un client API typé (`lib/api.ts`).
+
+**Endpoints utilisés** :
+- `GET /health` - Vérification de l'API
+- `GET /users` - Liste des utilisateurs
+- `GET /users/active` - Utilisateurs les plus actifs (nouveau)
+- `POST /recommend/{user_id}` - Recommandations
+- `GET /users/{user_id}/stats` - Statistiques utilisateur
+- `GET /popular` - Articles populaires
+- `GET /articles/recent` - Articles récents
+
+**Exemple de requête** :
+```typescript
+import { apiClient } from '@/lib/api';
+
+const recommendations = await apiClient.getRecommendations(
+  userId,      // ID utilisateur
+  'hybrid',    // Méthode
+  5,           // Nombre de recommandations
+  true         // Exclure articles vus
+);
+```
+
+### 🧪 Scripts disponibles
+
+```bash
+# Développement
+npm run dev          # Serveur de développement (localhost:3000)
+
+# Production
+npm run build        # Compile l'application
+npm start            # Serveur de production
+
+# Qualité
+npm run lint         # Vérification ESLint
+```
+
+### 🚢 Déploiement
+
+#### Vercel (Recommandé)
+
+```bash
+# Installer Vercel CLI
+npm i -g vercel
+
+# Déployer
+vercel
+
+# Configurer la variable d'environnement :
+# NEXT_PUBLIC_API_URL=https://votre-backend.azurewebsites.net
+```
+
+#### Azure Static Web Apps
+
+```bash
+# Build local
+npm run build
+
+# Déployer avec Azure CLI
+az staticwebapp create \
+  --name my-content-frontend \
+  --resource-group my-content-rg \
+  --source .
+```
+
+#### Docker
+
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+### ✅ Build production validé
+
+```bash
+npm run build
+✓ Compiled successfully in 4.5s
+✓ No TypeScript errors
+✓ No linting errors
+✓ Static pages: 2 (/, /insights)
+✓ First Load JS: ~161 kB (page principale)
+✓ First Load JS: ~136 kB (page insights)
+```
+
+### 📝 Documentation complète
+
+- **[frontend/README.md](frontend/README.md)** : Guide d'installation, configuration, déploiement
+- **[frontend/FEATURES.md](frontend/FEATURES.md)** : Liste détaillée des fonctionnalités
+- **[frontend/.env.example](frontend/.env.example)** : Template de configuration
+
+### 🎯 Roadmap & Améliorations futures
+
+- [ ] Filtres avancés (catégorie, date)
+- [ ] Comparaison côte-à-côte des méthodes
+- [ ] Graphiques de performance (Chart.js)
+- [ ] Mode sombre / clair
+- [ ] Internationalisation (i18n)
+- [ ] Tests E2E (Playwright)
+
+---
 
 **Prochaines étapes** :
 1. Déploiement en environnement de staging
