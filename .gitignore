@@ -138,6 +138,8 @@ celerybeat.pid
 
 # Environments
 .env
+.env*.local
+!.env.example
 .envrc
 .venv
 env/
@@ -207,3 +209,58 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# ====================================
+# Next.js / Frontend
+# ====================================
+# Dependencies
+frontend/node_modules/
+frontend/.pnp
+frontend/.pnp.*
+frontend/.yarn/*
+!frontend/.yarn/patches
+!frontend/.yarn/plugins
+!frontend/.yarn/releases
+!frontend/.yarn/versions
+
+# Testing
+frontend/coverage/
+
+# Next.js build output
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Production
+frontend/dist/
+
+# Vercel
+frontend/.vercel
+
+# TypeScript
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# Debug logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+*.pem
+
+# ====================================
+# Backend / Python specific
+# ====================================
+# Azure Functions
+backend/.python_packages/
+backend/.azure/
+backend/local.settings.json
+
+# Data files (uncomment if you don't want to version large data files)
+# backend/data/clicks/
+# backend/data/*.csv
+# backend/data/*.pickle

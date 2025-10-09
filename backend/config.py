@@ -41,8 +41,11 @@ class Settings(BaseSettings):
 
     # Date de référence (auto-détectée si None)
     REFERENCE_DATE: Optional[datetime] = None
-    
+
     class Config:
+        # Variables d'environnement peuvent surcharger ces valeurs
+        # Créez un fichier .env (voir .env.example) pour personnaliser
         env_file = ".env"
+        env_file_encoding = "utf-8"
 
 settings = Settings()
