@@ -1,0 +1,4 @@
+[config]
+# Enable build during deployment on Azure App Service
+# This ensures pip install runs automatically
+SCM_DO_BUILD_DURING_DEPLOYMENT=true

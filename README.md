@@ -4,7 +4,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-14%2B-black?logo=next.js&logoColor=white)](https://nextjs.org/)
-[![Azure](https://img.shields.io/badge/Azure-Functions-0078D4?logo=microsoft-azure&logoColor=white)](https://azure.microsoft.com/)
+[![Azure](https://img.shields.io/badge/Azure-App_Service-0078D4?logo=microsoft-azure&logoColor=white)](https://azure.microsoft.com/)
 [![Dataset](https://img.shields.io/badge/Dataset-Globo.com-red)](https://www.kaggle.com/gspmoreira/news-portal-user-interactions-by-globocom)
 
 > 🎓 OpenClassrooms • Parcours [AI Engineer](https://openclassrooms.com/fr/paths/795-ai-engineer) | 👋 *Étudiant* : [David Scanu](https://www.linkedin.com/in/davidscanu14/)
@@ -1265,25 +1265,13 @@ npm run build
 
 ### 📝 Documentation complète
 
+#### Documentation du projet
+- **[QUICK_START.md](documentation/QUICK_START.md)** : Guide de démarrage rapide
+- **[FRONTEND_OVERVIEW.md](documentation/FRONTEND_OVERVIEW.md)** : Vue d'ensemble du frontend
+- **[FRONTEND_TROUBLESHOOTING.md](documentation/FRONTEND_TROUBLESHOOTING.md)** : Résolution de problèmes frontend
+- **[BACKEND_TESTS.md](documentation/BACKEND_TESTS.md)** : Documentation des tests backend
+- **[DEPLOYMENT_AZURE.md](documentation/DEPLOYMENT_AZURE.md)** : Guide de déploiement sur Azure
+
+#### Documentation Frontend
 - **[frontend/README.md](frontend/README.md)** : Guide d'installation, configuration, déploiement
-- **[frontend/FEATURES.md](frontend/FEATURES.md)** : Liste détaillée des fonctionnalités
 - **[frontend/.env.example](frontend/.env.example)** : Template de configuration
-
-### 🎯 Roadmap & Améliorations futures
-
-- [ ] Filtres avancés (catégorie, date)
-- [ ] Comparaison côte-à-côte des méthodes
-- [ ] Graphiques de performance (Chart.js)
-- [ ] Mode sombre / clair
-- [ ] Internationalisation (i18n)
-- [ ] Tests E2E (Playwright)
-
----
-
-**Prochaines étapes** :
-1. Déploiement en environnement de staging
-2. Tests A/B sur échantillon d'utilisateurs (10%)
-3. Optimisation des pondérations hybrides
-4. Intégration du feedback utilisateur explicite (like/dislike)
-5. Exploration de modèles plus avancés (transformers, GNNs)
-

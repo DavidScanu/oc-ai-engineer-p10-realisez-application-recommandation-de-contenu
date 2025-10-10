@@ -1,5 +1,6 @@
 # Python.gitignore
 **/clusters_cache.pkl
+backend-deploy.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

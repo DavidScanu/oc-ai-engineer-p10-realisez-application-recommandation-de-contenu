@@ -1,5 +1,6 @@
 # backend/main.py
 import logging
+import os
 from datetime import datetime
 from typing import List, Optional
 import uvicorn
@@ -9,8 +10,8 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from models import (
-    RecommendationRequest, 
-    RecommendationResponse, 
+    RecommendationRequest,
+    RecommendationResponse,
     UserSegmentInfo,
     HealthResponse
 )
@@ -38,13 +39,19 @@ app = FastAPI(
 )
 
 # Middleware CORS pour le frontend
+# Configuration CORS: utilise ALLOWED_ORIGINS depuis .env ou défaut pour développement
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")
+allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # À restreindre en production
+    allow_origins=allowed_origins,  # Configurable via ALLOWED_ORIGINS dans .env
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+logger.info(f"🌐 CORS enabled for origins: {allowed_origins}")
 
 # Instances des recommandeurs (lazy loading)
 recommenders = {}
