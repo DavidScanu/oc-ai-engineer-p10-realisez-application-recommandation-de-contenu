@@ -42,12 +42,30 @@ Nous développons une interface simple qui :
 ## 📦 Livrables et démonstration
 
 ### 📱 Application de démonstration
-- Frontend : Interface utilisateur simple
-  - URL de production : (à venir)
-- Backend : Système de recommandation serverless déployé sur Azure Functions
-  - URL de production : (à venir)
-- Entrée : ID utilisateur → Sortie : Top 5 articles recommandés
-- Démonstration des fonctionnalités complètes du système
+
+#### Frontend - Interface utilisateur
+
+![Démonstration Frontend](images/mockup-frontend-01.png)
+
+L'interface utilisateur permet de :
+- Sélectionner un utilisateur parmi les plus actifs ou rechercher par ID
+- Choisir la méthode de recommandation (Hybride, Popularité, Contenu, Clustering)
+- Visualiser les 5 articles recommandés avec leurs métadonnées
+- Consulter les statistiques utilisateur en temps réel
+- Accéder aux insights (articles populaires et récents)
+
+#### Backend - API de recommandation
+
+![Démonstration Backend API](images/mockup-backend-01.png)
+
+L'API FastAPI expose :
+- Endpoints de recommandation avec 4 méthodes
+- Documentation interactive Swagger
+- Gestion automatique du cold start
+- Statistiques et monitoring
+- URL de production : (à venir)
+
+**Fonctionnement** : Entrée (ID utilisateur) → Sortie (Top 5 articles recommandés)
 
 ### 💻 [Code source versionné](https://github.com/DavidScanu/oc-ai-engineer-p10-realisez-application-recommandation-de-contenu)
 - Dépôt GitHub avec architecture complète
@@ -101,11 +119,10 @@ Nous développons une interface simple qui :
 - [x] Design responsive avec Tailwind CSS et shadcn/ui
 - [x] Intégration complète avec le backend FastAPI
 
-### Phase 6 : Documentation et présentation (À venir)
-- [ ] Finalisation du README technique
-- [ ] Création du support de présentation
-- [ ] Préparation de la démonstration live
-- [ ] Documentation de l'architecture cible
+### Phase 6 : Documentation et présentation
+- [x] Finalisation du README technique
+- [x] Création du support de présentation
+- [x] Préparation de la démonstration live
 
 
 ## 📊 Analyse exploratoire des données

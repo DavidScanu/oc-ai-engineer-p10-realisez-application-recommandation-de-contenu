@@ -8,6 +8,8 @@
 
 ## 🎯 Fonctionnalités
 
+![Interface Frontend](../images/mockup-frontend-01.png)
+
 ### Core Features
 - ✅ **Sélection d'utilisateur** : Interface intuitive pour choisir parmi les utilisateurs disponibles
 - ✅ **Recommandations personnalisées** : Affichage des 5 meilleurs articles recommandés
