@@ -371,15 +371,50 @@ Azure téléchargera automatiquement les fichiers Git LFS lors du déploiement.
 
 ### Voir les logs en temps réel
 
+**Méthode 1 : Streaming en temps réel via CLI** (recommandé)
+
 ```bash
-az webapp log tail --name my-content-api --resource-group my-content-rg
+# Voir les logs en continu (comme tail -f)
+az webapp log tail \
+  --name my-content-api-oc \
+  --resource-group my-content-rg
+
+# Appuyez sur Ctrl+C pour arrêter le streaming
+```
+
+**Méthode 2 : Télécharger tous les logs**
+
+```bash
+# Télécharger un zip avec tous les logs
+az webapp log download \
+  --name my-content-api-oc \
+  --resource-group my-content-rg \
+  --log-file azure-logs.zip
+
+# Extraire et consulter
+unzip azure-logs.zip -d logs/
+tail -100 logs/LogFiles/Application/*.log
+```
+
+**Méthode 3 : Consulter les logs récents**
+
+```bash
+# Télécharger et afficher les 100 dernières lignes
+az webapp log download \
+  --name my-content-api-oc \
+  --resource-group my-content-rg \
+  --log-file /tmp/logs.zip && \
+  unzip -q /tmp/logs.zip -d /tmp/logs && \
+  tail -100 /tmp/logs/LogFiles/Application/*.log
 ```
 
 ### Via le portail Azure
 
-1. Aller dans votre App Service
-2. **Monitoring** → **Log stream**
-3. **Diagnose and solve problems** pour troubleshooting
+1. Aller sur https://portal.azure.com
+2. Rechercher **my-content-api-oc**
+3. **Monitoring** → **Log stream** (streaming en temps réel)
+4. **Diagnose and solve problems** → troubleshooting automatique
+5. **Logs** → télécharger les fichiers de logs
 
 ### Application Insights (recommandé pour production)
 
