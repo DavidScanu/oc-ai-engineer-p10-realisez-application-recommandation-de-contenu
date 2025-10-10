@@ -212,14 +212,6 @@ vercel
 # NEXT_PUBLIC_API_URL=https://votre-backend-url.azurewebsites.net
 ```
 
-## 📚 Documentation
-
-- **README principal** : [README.md](README.md)
-- **Backend** : [backend/README.md](backend/README.md)
-- **Frontend** : [frontend/README.md](frontend/README.md)
-- **Features** : [frontend/FEATURES.md](frontend/FEATURES.md)
-- **Troubleshooting** : [frontend/TROUBLESHOOTING.md](frontend/TROUBLESHOOTING.md)
-
 ## 🎓 Architecture
 
 ```
@@ -259,9 +251,3 @@ vercel
 - [ ] Frontend démarré (http://localhost:3000 accessible)
 - [ ] Test d'une recommandation réussi
 - [ ] Page Insights fonctionne
-
----
-
-**Prêt à recommander !** 🎉
-
-Pour toute question, consultez la [documentation complète](README.md) ou le [guide de dépannage](frontend/TROUBLESHOOTING.md).
