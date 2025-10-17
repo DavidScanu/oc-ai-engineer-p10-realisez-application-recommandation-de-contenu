@@ -75,7 +75,7 @@ L'API FastAPI expose :
 - Documentation technique (README détaillé)
 - Code permettant un déploiement end-to-end
 
-### 📊 [Support de présentation]()
+### 📊 [Support de présentation](https://docs.google.com/presentation/d/1qPi_fDrxBx_xwaXM79m8dbP2ODxfvfmFpoGgK0gYHDQ/edit?usp=sharing)
 - Document PowerPoint/PDF (15-25 slides)
 - Description fonctionnelle de l'application
 - Analyse comparative des modèles testés (avantages/inconvénients)
@@ -104,10 +104,8 @@ L'API FastAPI expose :
 - [x] Documentation interactive (Swagger)
 
 ### Phase 4 : Déploiement Azure (En cours)
-- [ ] Configuration Azure Functions (Consumption Plan)
-- [ ] Déploiement des modèles et embeddings
-- [ ] Tests de performance et monitoring
-- [ ] Optimisation des coûts (gestion des services gratuits)
+- [x] Configuration Azure Functions (Consumption Plan)
+- [x] Déploiement des modèles et embeddings
 
 ### Phase 5 : Application frontend (✅ Complété)
 - [x] Interface de sélection des utilisateurs
